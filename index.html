@@ -1,0 +1,1526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pallet & Container Planner | HexaEcom</title>
+<meta name="author" content="Gaziur Rahman Shihab, HexaEcom">
+<meta name="description" content="Plan pallets, stacks and container or air loads for Amazon inbound shipments, with printable pallet sheets.">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{
+  --bg:#f3f5f8; --panel:#ffffff; --ink:#1b2330; --muted:#5d6878; --faint:#8a94a3; --line:#dde2e9; --line2:#eef1f5;
+  --brand:#1f6feb; --brand-ink:#ffffff; --ok:#1a8a4a; --warn:#b76e00; --err:#c0262d; --info:#1d5fc4;
+  --ok-bg:#e8f6ee; --warn-bg:#fff4e0; --err-bg:#fdecec; --info-bg:#e9f1fd;
+  --wood:#c9a36a; --radius:10px;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:14px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+.top{position:sticky;top:0;z-index:50;background:#141b26;color:#fff;display:flex;align-items:center;gap:16px;padding:10px 18px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.brand b{font-size:16px;display:block;white-space:nowrap}
+.brand small{color:#9fb0c6;font-size:12px;display:block;white-space:nowrap}
+.logo{width:36px;height:36px;border-radius:9px;background:var(--brand);display:grid;place-items:center;flex:none}
+.proj{flex:1;min-width:180px;max-width:420px;background:#1f2835;border:1px solid #2f3a4a;border-radius:8px;padding:7px 10px;color:#fff}
+.actions{display:flex;gap:6px;flex-wrap:wrap;margin-left:auto}
+.btn{border:1px solid var(--line);background:#fff;border-radius:8px;padding:6px 11px;display:inline-flex;align-items:center;gap:6px;font-weight:600;font-size:13px}
+.btn:hover{border-color:#b9c2cf}
+.top .btn{background:#222c3a;border-color:#334055;color:#e8eef6}
+.top .btn:hover{background:#2a3647}
+.btn.primary,.top .btn.primary{background:var(--brand);border-color:var(--brand);color:#fff}
+.btn.small{padding:3px 8px;font-size:12px}
+.btn.danger{color:var(--err)}
+.layout{display:grid;grid-template-columns:330px minmax(0,1fr);gap:16px;padding:16px;max-width:1700px;margin:0 auto}
+aside{display:flex;flex-direction:column;gap:12px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:14px}
+details.card{padding:0}
+details.card>summary{list-style:none;cursor:pointer;padding:12px 14px;font-weight:700;display:flex;align-items:center;gap:8px}
+details.card>summary::-webkit-details-marker{display:none}
+details.card>summary::after{content:"";margin-left:auto;width:8px;height:8px;border-right:2px solid var(--faint);border-bottom:2px solid var(--faint);transform:rotate(45deg);transition:.15s}
+details.card[open]>summary::after{transform:rotate(-135deg)}
+details.card .body{padding:0 14px 14px;display:flex;flex-direction:column;gap:10px}
+.lbl{font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin-bottom:3px;display:block}
+.inp,.sel{width:100%;border:1px solid var(--line);border-radius:7px;padding:6px 8px;background:#fff}
+.inp:focus,.sel:focus{outline:2px solid #b7d0fb;border-color:var(--brand)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.seg{display:flex;background:#eef1f5;border-radius:8px;padding:3px;gap:3px}
+.seg button{flex:1;border:0;background:transparent;border-radius:6px;padding:6px 8px;font-weight:600;color:var(--muted)}
+.seg button.on{background:#fff;color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.chk{display:flex;gap:8px;align-items:flex-start;font-size:13px}
+.chk input{margin-top:3px}
+.note{font-size:12px;color:var(--muted)}
+.hl{background:#fff8e6;border:1px solid #f1d58f;border-radius:8px;padding:8px}
+.warnbox{background:var(--err-bg);border:1px solid #f3b9bc;color:#8d1a20;border-radius:8px;padding:8px;font-size:12px}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:14px;flex-wrap:wrap}
+.tabs button{border:0;background:transparent;padding:10px 14px;font-weight:700;color:var(--muted);border-bottom:3px solid transparent;margin-bottom:-1px}
+.tabs button.on{color:var(--ink);border-color:var(--brand)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}
+.kpi{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px}
+.kpi .k{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.kpi .v{font-size:26px;font-weight:800;line-height:1.15;margin-top:2px}
+.kpi .s{font-size:12px;color:var(--muted)}
+.kpi.dark{background:#141b26;border-color:#141b26;color:#fff}.kpi.dark .k,.kpi.dark .s{color:#9fb0c6}
+.msgs{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+.msg{border-radius:8px;padding:8px 12px;font-size:13px;display:flex;gap:8px;align-items:flex-start}
+.msg b{white-space:nowrap}
+.msg.error{background:var(--err-bg);color:#8d1a20}
+.msg.warn{background:var(--warn-bg);color:#7a4a00}
+.msg.info{background:var(--info-bg);color:#153f86}
+.msg.ok{background:var(--ok-bg);color:#135f34}
+h2{font-size:18px;margin:0 0 10px}
+h3{font-size:15px;margin:0 0 8px}
+.shipHead{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.code{width:30px;height:30px;border-radius:7px;color:#fff;font-weight:800;display:grid;place-items:center;flex:none}
+.badge{display:inline-block;border-radius:999px;padding:2px 9px;font-size:12px;font-weight:700;background:#eef1f5;color:var(--muted)}
+.badge.ok{background:var(--ok-bg);color:var(--ok)}.badge.warn{background:var(--warn-bg);color:var(--warn)}.badge.err{background:var(--err-bg);color:var(--err)}
+table.t{border-collapse:collapse;width:100%;font-size:13px}
+table.t th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);border-bottom:2px solid var(--line);padding:6px 8px;white-space:nowrap}
+table.t td{border-bottom:1px solid var(--line2);padding:5px 8px;vertical-align:middle}
+table.t td.n,table.t th.n{text-align:right;font-variant-numeric:tabular-nums}
+table.t input{width:100%;border:1px solid transparent;background:transparent;border-radius:5px;padding:3px 5px}
+table.t input:hover{border-color:var(--line)}
+table.t input:focus{border-color:var(--brand);background:#fff;outline:none}
+.tblwrap{overflow:auto;max-height:420px;border:1px solid var(--line2);border-radius:8px}
+.group{margin:12px 0 4px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.swatch{width:14px;height:14px;border-radius:3px;display:inline-block;flex:none;border:1px solid rgba(0,0,0,.15)}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:8px}
+.optgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:6px}
+.opt.on{border-color:var(--brand);box-shadow:0 0 0 2px #b7d0fb}
+.sides{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
+@media (max-width:1200px){.optgrid,.sides{grid-template-columns:1fr}}
+.tile{border-radius:8px;border:1.5px solid;padding:7px 9px;cursor:pointer;background:#fff;text-align:left}
+.tile:hover{transform:translateY(-1px);box-shadow:0 2px 6px rgba(0,0,0,.08)}
+.tile .id{font-weight:800;font-size:16px}
+.tile .m{font-size:12px;color:var(--muted)}
+.tile .f{font-size:10.5px;font-weight:700;margin-top:2px}
+.split{display:grid;grid-template-columns:230px minmax(0,1fr);gap:14px}
+.plist{max-height:78vh;overflow:auto;display:flex;flex-direction:column;gap:6px;padding-right:4px}
+.plist .tile{padding:6px 9px}
+.plist .tile.on{box-shadow:0 0 0 3px #b7d0fb}
+.view3d{height:420px;border-radius:var(--radius);overflow:hidden;background:#eef2f7;border:1px solid var(--line);position:relative}
+.view3d canvas{display:block;width:100%!important;height:100%!important}
+.view3d .hint{position:absolute;left:10px;bottom:8px;font-size:11px;color:var(--muted);background:rgba(255,255,255,.8);padding:2px 6px;border-radius:5px;pointer-events:none}
+.no3d{display:grid;place-items:center;height:100%;color:var(--muted);padding:20px;text-align:center}
+.layers{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+.layer{background:#fff;border:1px solid var(--line);border-radius:8px;padding:8px}
+.layer .lt{font-weight:700;font-size:13px;margin-bottom:4px;display:flex;justify-content:space-between}
+svg text{font-family:inherit}
+.cont{margin-bottom:18px}
+.contHead{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+.load{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:0 18px;font-size:12.5px}
+.load div{display:flex;gap:8px;border-bottom:1px solid var(--line2);padding:3px 0;align-items:center}
+.load .o{width:26px;font-weight:800;color:var(--muted);text-align:right}
+.pill{display:inline-block;border-radius:5px;padding:1px 7px;color:#fff;font-weight:700;font-size:12px}
+.empty{padding:40px;text-align:center;color:var(--muted)}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.spacer{flex:1}
+.muted{color:var(--muted)}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px}
+#print{display:none}
+.site-foot{text-align:center;color:var(--muted);font-size:12px;padding:6px 16px 24px}
+.toast{position:fixed;right:16px;bottom:16px;background:#141b26;color:#fff;padding:10px 14px;border-radius:8px;font-size:13px;z-index:99;opacity:0;transition:.2s;pointer-events:none}
+.toast.show{opacity:1}
+@media (max-width:1000px){.layout{grid-template-columns:minmax(0,1fr);padding:10px}.split{grid-template-columns:minmax(0,1fr)}.top{padding:10px}.proj{max-width:none}.plist{max-height:none;flex-direction:row;overflow:auto}.plist .tile{min-width:120px}}
+@media print{
+  @page{size:A4 landscape;margin:8mm}
+  body{background:#fff}
+  .top,.layout,.toast,.site-foot{display:none!important}
+  #print{display:block}
+  .pp{page-break-after:always;break-after:page;height:192mm;overflow:hidden;position:relative;font-size:12px}
+  .pp:last-child{page-break-after:auto;break-after:auto}
+  .pp h1{font-size:22px;margin:0 0 4px}
+  .pp .pfoot{position:absolute;bottom:0;left:0;right:0;font-size:9px;color:#7a8290;display:flex;justify-content:space-between}
+  .pp .kpis{grid-template-columns:repeat(5,1fr)}
+  .pp .kpi .v{font-size:20px}
+  .pp .load{grid-template-columns:repeat(3,1fr);font-size:10px;gap:0 14px}
+  .pp .load div{white-space:nowrap;padding:2px 0}
+  .pp .load .pill{font-size:10px}
+  .pp table.t{font-size:11px}
+  .pp table.t td,.pp table.t th{padding:3px 6px}
+  .pp .msg{padding:5px 10px;font-size:11px}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <div class="logo"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linejoin="round"><rect x="3" y="3" width="8" height="7"/><rect x="13" y="3" width="8" height="7"/><rect x="3" y="11" width="18" height="6"/><path d="M3 20h18M6 17v3M12 17v3M18 17v3"/></svg></div>
+    <div><b>Pallet & Container Planner <span style="font-weight:600;color:#9fb0c6;font-size:13px">by HexaEcom</span></b><small>Sea and air pallet plans for Amazon inbound</small></div>
+  </div>
+  <input id="projName" class="proj" placeholder="Project name" aria-label="Project name">
+  <div class="actions">
+    <button class="btn" data-act="example">Load example</button>
+    <button class="btn" data-act="new">New</button>
+    <button class="btn" data-act="open">Open</button>
+    <button class="btn" data-act="save">Save</button>
+    <button class="btn" data-act="excel">Excel</button>
+    <button class="btn primary" data-act="print">Print / PDF</button>
+  </div>
+</header>
+<div class="layout">
+  <aside id="side"></aside>
+  <main>
+    <nav class="tabs" id="tabs"></nav>
+    <section id="view"></section>
+  </main>
+</div>
+<footer class="site-foot">Built by <b>Gaziur Rahman Shihab</b> · <b>HexaEcom</b> · Pallet & Container Planner</footer>
+<div id="print"></div>
+<div class="toast" id="toast"></div>
+<input type="file" id="fileProject" accept=".json,application/json" hidden>
+<input type="file" id="fileImport" accept=".xlsx,.xls,.csv" hidden>
+
+<script>
+'use strict';
+/* ====================================================================
+   Pallet & Container Planner  v1
+   All sizes are stored in cm and kg. Display units are converted.
+   ==================================================================== */
+const IN = 2.54, LB = 0.45359237, E = 1e-6;
+const EXAMPLE = [{"name":"Demo shipment A","shipmentId":"DEMO-SHIPMENT-A","labelPallets":"","lines":[["TEE100_Black_S",40,4,18.5,11.02,14.17,19.81],["TEE100_Black_M",40,5,18.5,11.02,14.17,18.71],["TEE100_Black_L",40,2,18.5,11.02,14.17,19.34],["TEE100_Black_XL",40,2,18.5,11.02,14.17,17.65],["TEE100_White_S",40,2,18.5,11.02,14.17,19.67],["TEE100_White_M",40,3,18.5,11.02,14.17,16.44],["TEE100_White_L",40,5,18.5,11.02,14.17,17.85],["TEE100_White_XL",40,3,18.5,11.02,14.17,16.64],["TEE100_Navy_S",40,5,18.5,11.02,14.17,16.52],["TEE100_Navy_M",40,6,18.5,11.02,14.17,16.76],["TEE100_Navy_L",40,3,18.5,11.02,14.17,18.63],["TEE100_Navy_XL",40,6,18.5,11.02,14.17,19.81],["TEE100_Sand_S",40,6,18.5,11.02,14.17,18.47],["TEE100_Sand_M",40,2,18.5,11.02,14.17,19.91],["TEE100_Sand_L",40,2,18.5,11.02,14.17,18.36],["TEE100_Sand_XL",40,3,18.5,11.02,14.17,17.37],["TEE100_Olive_XS",20,1,18.5,11.02,7.48,9.8],["TEE100_Olive_XXL",20,2,18.5,11.02,7.48,8.94]]},{"name":"Demo shipment B","shipmentId":"DEMO-SHIPMENT-B","labelPallets":"","lines":[["POLO200_White_XS",40,4,18.5,11.02,14.17,18.68],["POLO200_White_S",40,10,18.5,11.02,14.17,20.66],["POLO200_White_M",40,6,18.5,11.02,14.17,18.66],["POLO200_White_L",40,3,18.5,11.02,14.17,20.39],["POLO200_White_XL",40,10,18.5,11.02,14.17,19.06],["POLO200_Black_XS",40,10,18.5,11.02,14.17,19.88],["POLO200_Black_S",40,6,18.5,11.02,14.17,20.02],["POLO200_Black_M",40,8,18.5,11.02,14.17,19.64],["POLO200_Black_L",40,4,18.5,11.02,14.17,21.24],["POLO200_Black_XL",40,4,18.5,11.02,14.17,18.6],["POLO200_SkyBlue_XS",40,6,18.5,11.02,14.17,20.24],["POLO200_SkyBlue_S",40,6,18.5,11.02,14.17,21.0],["POLO200_SkyBlue_M",40,6,18.5,11.02,14.17,20.55],["POLO200_SkyBlue_L",40,3,18.5,11.02,14.17,18.74],["POLO200_SkyBlue_XL",40,8,18.5,11.02,14.17,18.91],["POLO200_GreyMarl_XS",40,6,18.5,11.02,14.17,18.86],["POLO200_GreyMarl_S",40,8,18.5,11.02,14.17,19.86],["POLO200_GreyMarl_M",40,3,18.5,11.02,14.17,21.13],["POLO200_GreyMarl_L",40,10,18.5,11.02,14.17,21.22],["POLO200_GreyMarl_XL",40,6,18.5,11.02,14.17,19.56],["POLO200_DarkRed_XS",40,6,18.5,11.02,14.17,20.5],["POLO200_DarkRed_S",40,10,18.5,11.02,14.17,21.25],["POLO200_DarkRed_M",40,3,18.5,11.02,14.17,21.41],["POLO200_DarkRed_L",40,6,18.5,11.02,14.17,20.05],["POLO200_DarkRed_XL",40,3,18.5,11.02,14.17,18.52],["HOODIE300_Black_M",40,3,18.5,11.02,18.9,26.45],["HOODIE300_Black_L",40,3,18.5,11.02,18.9,28.97],["HOODIE300_Black_XL",40,2,18.5,11.02,18.9,26.35],["HOODIE300_Black_XXL",40,2,18.5,11.02,18.9,28.58],["HOODIE300_Navy_M",40,2,18.5,11.02,18.9,25.38],["HOODIE300_Navy_L",40,2,18.5,11.02,18.9,26.62],["HOODIE300_Navy_XL",40,3,18.5,11.02,18.9,25.73],["HOODIE300_Navy_XXL",40,1,18.5,11.02,18.9,26.11],["HOODIE300_CharcoalMarl_M",40,2,18.5,11.02,18.9,25.78],["HOODIE300_CharcoalMarl_L",40,1,18.5,11.02,18.9,26.77],["HOODIE300_CharcoalMarl_XL",40,2,18.5,11.02,18.9,25.6],["HOODIE300_CharcoalMarl_XXL",40,2,18.5,11.02,18.9,26.79],["POLO200_SageGreen_XXL",20,1,18.5,11.02,7.48,12.57],["POLO200_SageGreen_XXXL",20,1,18.5,11.02,7.48,12.5]]}];
+const SHIP_COLORS = ['#1d5fc4','#e07000','#1a8a4a','#7b3fbf','#c0262d','#0e8a8a','#8a6d1d','#c2185b'];
+const SHIP_LIGHT  = ['#e6effc','#fdf0e2','#e5f5eb','#f1e9fa','#fdeaea','#e2f4f4','#f5efdd','#fbe6ef'];
+const SIZE_COLORS = ['#5b7fa6','#c65b4a','#4f9a6b','#a47bc8','#d4a03a','#4aa3a3','#8c6d52','#d46a9a','#6b8e23','#7f8c8d'];
+const PALLETS = {
+  US:   { name: 'US 40 x 48 in (Amazon US)', L: 121.92, W: 101.6 },
+  EUR:  { name: 'EUR / UK 120 x 80 cm', L: 120, W: 80 },
+  ISO:  { name: 'Industrial 120 x 100 cm', L: 120, W: 100 },
+  AUS:  { name: 'Australian 116.5 x 116.5 cm', L: 116.5, W: 116.5 },
+  CUSTOM: { name: 'Custom size' }
+};
+const CONTAINERS = {
+  '20GP': { name: "20' Standard", L: 589.8, W: 235.2, H: 239.3, dW: 234.0, dH: 228.0, payload: 28200 },
+  '20HC': { name: "20' High Cube", L: 589.8, W: 235.2, H: 269.8, dW: 234.0, dH: 258.5, payload: 28000 },
+  '40GP': { name: "40' Standard", L: 1203.2, W: 235.2, H: 239.3, dW: 234.0, dH: 228.0, payload: 26700 },
+  '40HC': { name: "40' High Cube", L: 1203.2, W: 235.2, H: 269.8, dW: 234.0, dH: 258.5, payload: 26500 },
+  '45HC': { name: "45' High Cube", L: 1355.6, W: 235.2, H: 269.8, dW: 234.0, dH: 258.5, payload: 27700 }
+};
+const AIRCRAFT = {
+  lower:   { name: 'Passenger aircraft, lower deck', H: 160 },
+  main244: { name: 'Freighter, main deck (244 cm)', H: 244 },
+  main300: { name: 'Freighter, main deck (300 cm)', H: 300 },
+  custom:  { name: 'Custom height' }
+};
+const US_ROAD_KG = 19900;   // rough cargo limit for US road haulage of one container
+const AMZ_BOX_KG = 22.68;   // 50 lb
+const COLORS = {
+  black:'#1f1f1f', white:'#ffffff', offwhite:'#f3efe6', owhite:'#f3efe6', ivory:'#f6f1e1', cream:'#f3e9d2', natural:'#efe6d2',
+  navy:'#25346b', darknavy:'#1b2340', blue:'#2f6fd0', royalblue:'#2a4fc2', lightblue:'#a9c8e6', skyblue:'#8ec3e8', babyblue:'#b9d8f2', denim:'#3f5f8c',
+  grey:'#9ea3a8', gray:'#9ea3a8', lightgrey:'#c9ccd0', greymarl:'#a6a9ad', greymelange:'#a6a9ad', darkgrey:'#5f6368', darkgreymarl:'#5f6368',
+  charcoal:'#4a4d52', charcoalmarl:'#4a4d52', silver:'#c0c4c8',
+  sand:'#d8c49b', beige:'#d9c3a0', khaki:'#b8a77a', tan:'#c8a27a', stone:'#cfc4b0', taupe:'#9b8b7a', camel:'#b8864f',
+  brown:'#7a5230', chocolate:'#4e3226', coffee:'#5a3d2b', mocha:'#7b5a45',
+  blush:'#e9b7b2', pink:'#f0a3b5', hotpink:'#e0457b', rose:'#d9899a', dustypink:'#d6a3a5',
+  red:'#c62e2e', darkred:'#7d1f24', maroon:'#6b1f2a', burgundy:'#6d1a36', wine:'#6a1f35',
+  green:'#2f8f4e', deepgreen:'#1f4d36', darkgreen:'#1f4d36', forestgreen:'#2b5a3a', sagegreen:'#9caf88', sage:'#9caf88', mint:'#a8e0c8', emerald:'#1d8a5f',
+  olive:'#6b6b2a', darkolive:'#4f5a2e', goldenolive:'#8d7f3a', khakigreen:'#7b7b52',
+  lavender:'#b9a7d6', lilac:'#c8a8d8', purple:'#6a3fa0', plum:'#6e3b5c',
+  yellow:'#f2c94c', mustard:'#d4a52a', gold:'#c9a227', orange:'#e8812f', coral:'#f08a70', peach:'#f5b893', rust:'#a84e2b',
+  teal:'#2a8c8c', turquoise:'#39b5b0', aqua:'#7fd3d3',
+  b:'#1f1f1f', w:'#ffffff'
+};
+
+/* ---------------- state ---------------- */
+function defaultState(){
+  return {
+    v: 1, name: 'New project', mode: 'sea', units: 'in', wunits: 'lb', colorBy: 'product',
+    pallet: { preset: 'US', L: 121.92, W: 101.6, H: 13.97, wt: 20 },
+    rules: { stackable: true, perPalletMax: 132.08, stackMax: 254, singleMax: 182.88,
+             palletWtMax: 680.39, stackWtMax: 680.39, mixSizes: false, mixShipments: false, onEnd: false },
+    sea: { type: '40HC', pattern: 'lanes', doorSpot: false },
+    air: { craft: 'lower', H: 160, divisor: 6000 },
+    shipments: []
+  };
+}
+let S = defaultState();
+let R = null;
+const ui = { tab: 'shipments', pallet: null, cont: 0, cont3d: null, importTarget: null, showOpt: 'both' };
+let uidSeq = 1;
+const uid = () => 'u' + (Date.now().toString(36)) + (uidSeq++);
+
+/* ---------------- helpers ---------------- */
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const pad = n => String(n).padStart(2, '0');
+const byAscii = (a, b) => (a < b ? -1 : a > b ? 1 : 0);
+const trimNum = s => s.replace(/(\.\d*?)0+$/, '$1').replace(/\.$/, '');
+function lenVal(cm, d){ const v = S.units === 'in' ? cm / IN : cm; return trimNum(v.toFixed(d ?? (S.units === 'in' ? 2 : 1))); }
+function fL(cm, d = 1){ return lenVal(cm, d) + (S.units === 'in' ? ' in' : ' cm'); }
+function fDims(a, b, c){ return [a, b, c].map(x => lenVal(x, 1)).join(' x ') + (S.units === 'in' ? ' in' : ' cm'); }
+function fDimsCm(a, b, c){ return [a, b, c].map(x => trimNum(x.toFixed(0))).join(' x ') + ' cm'; }
+function wtVal(kg, d){ const v = S.wunits === 'lb' ? kg / LB : kg; return trimNum(v.toFixed(d ?? 1)); }
+function fW(kg){ const v = S.wunits === 'lb' ? kg / LB : kg; return Math.round(v).toLocaleString('en-US') + (S.wunits === 'lb' ? ' lb' : ' kg'); }
+const Lu = () => (S.units === 'in' ? 'in' : 'cm');
+const Wu = () => (S.wunits === 'lb' ? 'lb' : 'kg');
+function toCm(v){ return S.units === 'in' ? v * IN : v; }
+function toKg(v){ return S.wunits === 'lb' ? v * LB : v; }
+function getPath(o, p){ return p.split('.').reduce((a, k) => (a == null ? a : a[k]), o); }
+function setPath(o, p, v){ const ks = p.split('.'); let a = o; for (let i = 0; i < ks.length - 1; i++) a = a[ks[i]]; a[ks[ks.length - 1]] = v; }
+function runs(ns){
+  if (!ns.length) return '';
+  ns = ns.slice().sort((a, b) => a - b); const out = []; let s = ns[0], p = s;
+  for (const n of ns.slice(1)) { if (n === p + 1) { p = n; continue; } out.push(s === p ? `${s}` : `${s}-${p}`); s = p = n; }
+  out.push(s === p ? `${s}` : `${s}-${p}`); return out.join(', ');
+}
+function toast(msg){ const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove('show'), 2600); }
+function shipCode(i){ return String.fromCharCode(65 + (i % 26)); }
+function shipColor(i){ return SHIP_COLORS[i % SHIP_COLORS.length]; }
+function shipLight(i){ return SHIP_LIGHT[i % SHIP_LIGHT.length]; }
+
+/* ---------------- SKU parsing ---------------- */
+const SIZE_RE = /^(XXXS|XXS|XS|S|M|L|XL|XXL|XXXL|XXXXL|[2-6]XL|OS|OSFA|ONESIZE|\d{1,3}(\.\d)?|\d{1,2}[-/]\d{1,2}[A-Z]?|\d{1,2}(M|Y|T))$/i;
+const skuCache = new Map();
+function skuInfo(sku){
+  if (skuCache.has(sku)) return skuCache.get(sku);
+  const toks = String(sku).split(/[_\-\s\/]+/).filter(Boolean);
+  let size = '';
+  if (toks.length > 1 && SIZE_RE.test(toks[toks.length - 1])) size = toks[toks.length - 1].toUpperCase();
+  const style = toks[0] || String(sku);
+  let colour = '', fill = null, stripe = null;
+  const cand = toks.slice(1, size ? -1 : undefined);
+  for (let i = cand.length - 1; i >= 0 && !fill; i--) {
+    const raw = cand[i];
+    const norm = raw.toLowerCase().replace(/[^a-z&]/g, '');
+    if (norm.includes('&') || norm.includes('stripe')) {
+      const parts = norm.replace(/stripes?/g, '').split('&').filter(Boolean).map(p => COLORS[p]).filter(Boolean);
+      if (parts.length) { fill = parts[0]; stripe = parts.length > 1 ? parts.slice(0, 2) : [parts[0], '#ffffff']; colour = raw; }
+    } else if (COLORS[norm]) { fill = COLORS[norm]; colour = raw; }
+  }
+  if (!fill) {
+    let h = 0; const base = cand.join('_') || style; for (const c of base) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+    fill = `hsl(${h % 360} 45% 62%)`; colour = cand.join(' ') || '';
+  }
+  const info = { size, style, colour: colour.replace(/&/g, ' & '), fill, stripe };
+  skuCache.set(sku, info); return info;
+}
+function boxFill(b, pal){
+  if (S.colorBy === 'size') return { fill: SIZE_COLORS[b.size.idx % SIZE_COLORS.length], stripe: null };
+  if (S.colorBy === 'shipment') return { fill: shipColor(b.si), stripe: null };
+  const i = skuInfo(b.sku); return { fill: i.fill, stripe: i.stripe };
+}
+function hexLum(c){
+  if (!c || c[0] !== '#') return 0.6;
+  const n = parseInt(c.slice(1), 16), r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+  return (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
+}
+
+/* ---------------- layer pattern ---------------- */
+function layerPattern(a, b, P, Q){
+  // box footprint a x b (either way round), pallet P (x) by Q (y). No overhang.
+  const grid = (x0, y0, W, H, w, h) => {
+    const nx = Math.floor((W + E) / w), ny = Math.floor((H + E) / h), r = [];
+    for (let j = 0; j < ny; j++) for (let i = 0; i < nx; i++) r.push({ x: x0 + i * w, y: y0 + j * h, w, h });
+    return r;
+  };
+  let best = [];
+  const consider = r => { if (r.length > best.length) best = r; };
+  for (const [w, h] of [[a, b], [b, a]]) consider(grid(0, 0, P, Q, w, h));
+  for (const [w, h] of [[a, b], [b, a]]) {
+    const kx = Math.floor((P + E) / w);
+    for (let k = 1; k < kx; k++) consider(grid(0, 0, k * w, Q, w, h).concat(grid(k * w, 0, P - k * w, Q, h, w)));
+    const ky = Math.floor((Q + E) / h);
+    for (let k = 1; k < ky; k++) consider(grid(0, 0, P, k * h, w, h).concat(grid(0, k * h, P, Q - k * h, h, w)));
+  }
+  if (best.length) {
+    const mx = Math.max(...best.map(r => r.x + r.w)), my = Math.max(...best.map(r => r.y + r.h));
+    const ox = (P - mx) / 2, oy = (Q - my) / 2;
+    best = best.map(r => ({ x: r.x + ox, y: r.y + oy, w: r.w, h: r.h }));
+    // order: row by row, left to right (for readable numbering)
+    best.sort((p, q) => (Math.abs(p.y - q.y) > 1 ? p.y - q.y : p.x - q.x));
+  }
+  return best;
+}
+
+/* ---------------- planner ---------------- */
+function sizeKey(l){ const a = Math.max(l.L, l.W), b = Math.min(l.L, l.W); return `${a.toFixed(1)}x${b.toFixed(1)}x${l.H.toFixed(1)}`; }
+
+function compute(){
+  const res = { msgs: [], sizes: [], ships: [], pallets: [], units: [], containers: [], air: null, spots: null, maxH: 0, Hcap: 0 };
+  const msg = (level, text) => res.msgs.push({ level, text });
+  const pal = S.pallet;
+  const P = Math.max(pal.L, pal.W), Q = Math.min(pal.L, pal.W);
+  res.P = P; res.Q = Q;
+  const cont = CONTAINERS[S.sea.type];
+  res.cont = cont;
+  let maxH;
+  if (S.mode === 'air') maxH = Math.min(S.air.H, S.rules.singleMax);
+  else maxH = S.rules.stackable ? S.rules.perPalletMax : S.rules.singleMax;
+  if (S.mode === 'sea') maxH = Math.min(maxH, cont.dH - 2, cont.H - 5);
+  res.maxH = maxH;
+  const Hcap = maxH - pal.H, Wcap = S.rules.palletWtMax - pal.wt;
+  res.Hcap = Hcap;
+
+  if (pal.preset !== 'US') msg('warn', `Pallet is ${fDims(pal.L, pal.W, pal.H).replace(/ x [^x]*$/, '')}. Amazon US needs 40 x 48 in (101.6 x 121.9 cm) pallets. A different pallet changes how many boxes fit per layer.`);
+  if (pal.H >= 18) msg('warn', `The empty pallet is ${fL(pal.H)} high. A tall pallet wastes height on every pallet and stack. Standard 40 x 48 in pallets are about 12 to 15 cm (4.75 to 6 in).`);
+  if (Hcap <= 0) { msg('error', 'The empty pallet is taller than the height limit. Check the pallet height and limits.'); }
+
+  // ---- expand boxes and sizes ----
+  const sizeMap = new Map();
+  S.shipments.forEach((sh, si) => {
+    const lines = sh.lines.filter(l => l.sku && l.boxes > 0 && l.L > 0 && l.W > 0 && l.H > 0)
+      .map((l, i) => ({ l, i })).sort((p, q) => byAscii(String(p.l.sku), String(q.l.sku)) || p.i - q.i).map(x => x.l);
+    const boxes = []; let n = 0;
+    for (const l of lines) {
+      const key = sizeKey(l);
+      if (!sizeMap.has(key)) sizeMap.set(key, { key, a: Math.max(l.L, l.W), b: Math.min(l.L, l.W), h: l.H, count: 0, maxWt: 0, ships: new Set() });
+      const sz = sizeMap.get(key);
+      for (let k = 0; k < Math.round(l.boxes); k++) {
+        n++; boxes.push({ si, n, sku: String(l.sku), upb: +l.upb || 0, L: sz.a, W: sz.b, H: l.H, wt: +l.wt || 0, size: sz });
+        sz.count++; sz.maxWt = Math.max(sz.maxWt, +l.wt || 0); sz.ships.add(si);
+      }
+      if ((+l.wt || 0) > AMZ_BOX_KG + 0.01) msg('warn', `${esc(l.sku)}: box weighs ${fW(l.wt)}. Amazon's standard box limit is 50 lb (22.7 kg); heavier boxes need Team Lift labels. Check the AWD rules.`);
+    }
+    res.ships.push({ si, sh, boxes, N: n, units: boxes.reduce((a, b) => a + b.upb, 0), pallets: [] });
+  });
+  res.sizes = [...sizeMap.values()].sort((a, b) => b.count - a.count);
+  res.sizes.forEach((s, i) => { s.idx = i; s.color = SIZE_COLORS[i % SIZE_COLORS.length]; });
+
+  // ---- orientation / layer per size ----
+  for (const s of res.sizes) {
+    const opts = [{ fa: s.a, fb: s.b, h: s.h, upright: true }];
+    if (S.rules.onEnd) opts.push({ fa: s.a, fb: s.h, h: s.b, upright: false }, { fa: s.b, fb: s.h, h: s.a, upright: false });
+    let best = null;
+    for (const o of opts) {
+      if (o.h > Hcap + E) continue;
+      const rects = layerPattern(o.fa, o.fb, P, Q);
+      if (!rects.length) continue;
+      let layers = Math.floor((Hcap + E) / o.h);
+      const lw = rects.length * s.maxWt;
+      if (lw > 0) layers = Math.min(layers, Math.floor((Wcap + E) / lw));
+      if (layers < 1) continue;
+      const cap = rects.length * layers;
+      if (!best || cap > best.cap + E) best = { ...o, rects, TI: rects.length, layers, cap, fp: `${Math.max(o.fa, o.fb).toFixed(1)}x${Math.min(o.fa, o.fb).toFixed(1)}` };
+    }
+    s.o = best;
+    if (!best) msg('error', `Boxes of ${fDims(s.a, s.b, s.h)} don't fit on this pallet within the height and weight limits.`);
+    else if (!best.upright) msg('warn', `Boxes of ${fDims(s.a, s.b, s.h)} are placed on their side (${fL(best.h)} up) to fit more. Check the cartons have no "This side up" marking and that labels stay visible.`);
+  }
+
+  // ---- pack each shipment ----
+  for (const shp of res.ships) {
+    const groups = res.sizes.filter(s => s.o).map(s => ({ size: s, boxes: shp.boxes.filter(b => b.size === s) })).filter(g => g.boxes.length);
+    const unplaced = shp.boxes.filter(b => !b.size.o).length;
+    if (unplaced) msg('error', `${shipLabel(shp.si)}: ${unplaced} boxes can't be placed (size doesn't fit).`);
+    const bins = packGroups(groups, S.rules.mixSizes, Hcap, Wcap);
+    shp.pallets = binsToPallets(bins, groups, shp.si, pal);
+  }
+
+  // ---- cross-shipment merge (only when a shipment has more pallets than labels) ----
+  if (S.rules.mixShipments && res.ships.length > 1) {
+    for (let guard = 0; guard < 50; guard++) {
+      let changed = false;
+      for (const shp of res.ships) {
+        const lab = +shp.sh.labels || 0;
+        if (!lab || shp.pallets.length <= lab) continue;
+        const cands = shp.pallets.slice().sort((a, b) => a.height - b.height);
+        for (const X of cands) {
+          let bestY = null, bestLeft = Infinity;
+          for (const o of res.ships) {
+            if (o === shp) continue;
+            const olab = +o.sh.labels || 0;
+            if (olab && o.pallets.length > olab) continue;
+            for (const Y of o.pallets) {
+              if (!Y.flat) continue;
+              const h = Y.height + (X.height - pal.H), w = Y.weight + X.weight - pal.wt;
+              if (h > maxH + E || w > S.rules.palletWtMax + E) continue;
+              if (maxH - h < bestLeft) { bestLeft = maxH - h; bestY = Y; }
+            }
+          }
+          if (bestY) {
+            bestY.layers.push(...X.layers); refreshPallet(bestY, pal); bestY.mixedShip = true;
+            shp.pallets.splice(shp.pallets.indexOf(X), 1); changed = true; break;
+          }
+        }
+      }
+      if (!changed) break;
+    }
+  }
+  // number pallets
+  for (const shp of res.ships) {
+    shp.pallets.forEach((p, i) => { p.n = i + 1; p.id = `${shipCode(shp.si)}-${pad(i + 1)}`; p.si = shp.si; p.labelOf = shp.pallets.length; });
+    res.pallets.push(...shp.pallets);
+    const lab = +shp.sh.labels || 0;
+    if (lab && lab !== shp.pallets.length) msg(shp.pallets.length > lab ? 'error' : 'warn', `${shipLabel(shp.si)} needs <b>${shp.pallets.length}</b> pallets but has <b>${lab}</b> pallet labels. Update the pallet count in Seller Central and reprint labels, or change the rules.`);
+    else if (lab) msg('ok', `${shipLabel(shp.si)}: ${shp.pallets.length} pallets, matches the ${lab} pallet labels.`);
+  }
+  const mixedShip = res.pallets.filter(p => p.mixedShip);
+  if (mixedShip.length) msg('info', `Mixed pallet${mixedShip.length > 1 ? 's' : ''} ${mixedShip.map(p => p.id).join(', ')} carr${mixedShip.length > 1 ? 'y' : 'ies'} boxes from two shipments. Every box keeps its own label.`);
+  const mixedSize = res.pallets.filter(p => p.sizes.length > 1 && !p.mixedShip);
+  if (mixedSize.length) msg('info', `${mixedSize.length} pallet${mixedSize.length > 1 ? 's carry' : ' carries'} more than one box size. Each layer is one full size; only the top layer can be partly filled.`);
+
+  // ---- sea: stacks and containers ----
+  if (S.mode === 'sea' && res.pallets.length) seaPlan(res, msg);
+  if (S.mode === 'air' && res.pallets.length) airPlan(res, msg);
+  if (!S.shipments.length) msg('info', 'Add a shipment (Shipments tab) or click <b>Load example</b> to see how it works.');
+  return res;
+}
+function shipLabel(si){ const sh = S.shipments[si], c = shipCode(si); const nm = sh && sh.name && sh.name.trim() !== 'Shipment ' + c ? ' (' + esc(sh.name) + ')' : ''; return `Shipment ${c}${nm}`; }
+
+function packGroups(groups, mix, Hcap, Wcap){
+  const G = groups.map(g => {
+    const o = g.size.o, N = g.boxes.length;
+    return { size: g.size, TI: o.TI, h: o.h, lw: o.TI * g.size.maxWt, F: Math.floor(N / o.TI), r: N % o.TI, fp: o.fp };
+  });
+  let partials = G.map((x, gi) => x.r > 0 ? { parts: [{ gi, count: x.r }], h: x.h, fp: x.fp, TI: x.TI, count: x.r, wt: x.r * x.size.maxWt, gs: [gi] } : null).filter(Boolean);
+  if (mix) {
+    partials.sort((a, b) => b.h - a.h);
+    const merged = [];
+    for (const p of partials) {
+      const c = merged.find(c => c.fp === p.fp && c.TI === p.TI && c.count + p.count <= c.TI);
+      if (c) { c.parts.push(...p.parts); c.count += p.count; c.wt += p.wt; c.gs.push(...p.gs); c.h = Math.max(c.h, p.h); }
+      else merged.push({ ...p, parts: p.parts.slice(), gs: p.gs.slice() });
+    }
+    partials = merged;
+  }
+  const F = G.map(x => x.F);
+  const used = partials.map(() => false);
+  const bins = [];
+  const search = allowed => {
+    let best = null, nodes = 0;
+    const cnt = new Array(G.length).fill(0);
+    const consider = (h, w, pi) => {
+      const gset = new Set(allowed.filter(g => cnt[g] > 0));
+      if (pi != null) partials[pi].gs.forEach(g => gset.add(g));
+      const cand = { cnt: cnt.slice(), pi, h, w, ng: gset.size };
+      if (!best) { best = cand; return; }
+      if (h > best.h + 1e-4) best = cand;
+      else if (Math.abs(h - best.h) <= 1e-4) {
+        if (cand.ng < best.ng || (cand.ng === best.ng && pi == null && best.pi != null)) best = cand;
+      }
+    };
+    const rec = (i, h, w) => {
+      if (++nodes > 250000) return;
+      if (i === allowed.length) {
+        if (cnt.some(c => c > 0)) consider(h, w, null);
+        partials.forEach((p, pi) => {
+          if (used[pi]) return;
+          if (!mix && !(p.gs.length === 1 && allowed.includes(p.gs[0]))) return;
+          if (!cnt.some(c => c > 0) && allowed.length > 1) return;
+          if (h + p.h <= Hcap + E && w + p.wt <= Wcap + E) consider(h + p.h, w + p.wt, pi);
+        });
+        return;
+      }
+      const gi = allowed[i], x = G[gi];
+      const maxc = Math.min(F[gi], Math.floor((Hcap - h + E) / x.h));
+      for (let c = maxc; c >= 0; c--) {
+        if (x.lw > 0 && w + c * x.lw > Wcap + E) continue;
+        cnt[gi] = c; rec(i + 1, h + c * x.h, w + c * x.lw);
+      }
+      cnt[gi] = 0;
+    };
+    rec(0, 0, 0);
+    return best;
+  };
+  const commit = b => {
+    b.cnt.forEach((c, gi) => (F[gi] -= c));
+    if (b.pi != null) used[b.pi] = true;
+    bins.push({ cnt: b.cnt, pi: b.pi, h: b.h, w: b.w });
+  };
+  if (mix) {
+    const all = G.map((_, i) => i);
+    while (F.some(f => f > 0)) {
+      const b = search(all.filter(i => F[i] > 0));
+      if (!b || !b.cnt.some(c => c > 0)) break;
+      commit(b);
+    }
+  } else {
+    G.forEach((_, gi) => {
+      while (F[gi] > 0) { const b = search([gi]); if (!b || !b.cnt.some(c => c > 0)) break; commit(b); }
+    });
+  }
+  // place leftover partial layers on top of bins with room, else new bins
+  partials.map((p, pi) => ({ p, pi })).filter(x => !used[x.pi]).sort((a, b) => b.p.h - a.p.h).forEach(({ p, pi }) => {
+    let best = null, left = Infinity;
+    for (const b of bins) {
+      if (b.pi != null) continue;
+      if (!mix) { const gs = b.cnt.map((c, gi) => c > 0 ? gi : -1).filter(g => g >= 0); if (gs.length !== 1 || gs[0] !== p.gs[0] || p.gs.length !== 1) continue; }
+      if (b.h + p.h <= Hcap + E && b.w + p.wt <= Wcap + E && Hcap - b.h - p.h < left) { left = Hcap - b.h - p.h; best = b; }
+    }
+    if (best) { best.pi = pi; best.h += p.h; best.w += p.wt; }
+    else bins.push({ cnt: new Array(G.length).fill(0), pi, h: p.h, w: p.wt });
+    used[pi] = true;
+  });
+  return { G, bins, partials };
+}
+
+function binsToPallets(pack, groups, si, pal){
+  const { G, bins, partials } = pack;
+  // order: by dominant size, pure before mixed, bins with partial last
+  const info = bins.map((b, k) => {
+    const boxesBy = G.map((x, gi) => b.cnt[gi] * x.TI + (b.pi != null ? partials[b.pi].parts.filter(p => p.gi === gi).reduce((a, p) => a + p.count, 0) : 0));
+    let dom = 0; boxesBy.forEach((c, gi) => { if (c > boxesBy[dom]) dom = gi; });
+    const ng = boxesBy.filter(c => c > 0).length;
+    return { b, k, dom: G[dom].size.idx, mixed: ng > 1 ? 1 : 0, part: b.pi != null ? 1 : 0 };
+  });
+  info.sort((p, q) => p.dom - q.dom || p.mixed - q.mixed || p.part - q.part || p.k - q.k);
+  const queues = groups.map(g => g.boxes.slice().sort((a, b) => a.n - b.n));
+  // reserve the tail of each queue for partial layers
+  const tails = G.map((x, gi) => queues[gi].splice(queues[gi].length - x.r, x.r));
+  const pallets = [];
+  for (const { b } of info) {
+    const layers = [];
+    const full = [];
+    b.cnt.forEach((c, gi) => { for (let k = 0; k < c; k++) full.push(gi); });
+    full.sort((p, q) => G[q].h - G[p].h || G[p].size.idx - G[q].size.idx);
+    for (const gi of full) {
+      const bx = queues[gi].splice(0, G[gi].TI);
+      layers.push({ h: G[gi].h, rects: G[gi].size.o.rects, boxes: bx, full: true, orient: G[gi].size.o });
+    }
+    if (b.pi != null) {
+      const p = partials[b.pi]; const bx = [];
+      for (const part of p.parts) bx.push(...tails[part.gi].splice(0, part.count));
+      bx.sort((x, y) => x.n - y.n);
+      const host = G[p.parts[0].gi].size.o;
+      layers.push({ h: p.h, rects: host.rects, boxes: bx, full: bx.length >= host.TI, orient: host });
+    }
+    const pl = { uid: uid(), si, layers, mixedShip: false };
+    refreshPallet(pl, pal);
+    pallets.push(pl);
+  }
+  return pallets;
+}
+function refreshPallet(p, pal){
+  p.height = pal.H + p.layers.reduce((a, l) => a + l.h, 0);
+  p.boxes = p.layers.flatMap(l => l.boxes);
+  p.count = p.boxes.length;
+  p.weight = pal.wt + p.boxes.reduce((a, b) => a + b.wt, 0);
+  p.flat = p.layers.length > 0 && p.layers[p.layers.length - 1].full;
+  p.sizes = [...new Set(p.boxes.map(b => b.size.idx))].sort((a, b) => a - b);
+  p.units = p.boxes.reduce((a, b) => a + b.upb, 0);
+  p.ships = [...new Set(p.boxes.map(b => b.si))];
+}
+
+/* ---------------- sea plan ---------------- */
+const PATTERNS = { straight: { no: 1, name: 'Straight rows' }, lanes: { no: 2, name: 'Two lanes' } };
+function floorSpots(cont, P, Q, pattern, doorSpot){
+  // P = long side of the pallet (48 in), Q = short side (40 in). x runs along the container from the front wall, y across.
+  const L = cont.L, W = cont.W, spots = [], lanes = [];
+  let desc = '', spareW = 0, fallback = false, doorSlack = null;
+  if (pattern === 'lanes' && P + Q > W + E) { pattern = 'straight'; fallback = true; }
+  if (pattern === 'lanes') {
+    const n1 = Math.floor((L + E) / Q), n2 = Math.floor((L + E) / P);
+    spareW = W - P - Q; const off = spareW / 2;
+    for (let i = 0; i < n1; i++) spots.push({ x: i * Q, y: off, w: Q, d: P, lane: 1, pos: i + 1 });
+    for (let i = 0; i < n2; i++) spots.push({ x: i * P, y: off + P, w: P, d: Q, lane: 2, pos: i + 1 });
+    lanes.push({ lane: 1, n: n1, across: P, along: Q, y: off, spare: L - n1 * Q }, { lane: 2, n: n2, across: Q, along: P, y: off + P, spare: L - n2 * P });
+    desc = `Lane 1: ${n1} pallets with the ${fL(P, 0)} side across · Lane 2: ${n2} pallets with the ${fL(Q, 0)} side across`;
+  } else {
+    const optA = { along: P, across: Q, na: Math.floor((W + E) / Q), nr: Math.floor((L + E) / P) };
+    const optB = { along: Q, across: P, na: Math.floor((W + E) / P), nr: Math.floor((L + E) / Q) };
+    const o = optB.na * optB.nr > optA.na * optA.nr ? optB : optA;
+    spareW = W - o.na * o.across; const off = spareW / 2;
+    for (let c = 0; c < o.na; c++) {
+      for (let r = 0; r < o.nr; r++) spots.push({ x: r * o.along, y: off + c * o.across, w: o.along, d: o.across, lane: c + 1, pos: r + 1 });
+      lanes.push({ lane: c + 1, n: o.nr, across: o.across, along: o.along, y: off + c * o.across, spare: L - o.nr * o.along });
+    }
+    desc = `${o.na} lanes of ${o.nr} pallets, all with the ${fL(o.across, 0)} side across`;
+    if (doorSpot) {
+      const left = L - o.nr * o.along;
+      if (left + E >= o.across && W + E >= o.along) {
+        const n2 = Math.floor((W + E) / o.along), off2 = (W - n2 * o.along) / 2;
+        for (let c = 0; c < n2; c++) spots.push({ x: o.nr * o.along, y: off2 + c * o.along, w: o.across, d: o.along, lane: 'D', pos: c + 1 });
+        lanes.forEach(l => (l.spare = 0));
+        desc += ` + ${n2} turned at the doors`;
+        doorSlack = left - o.across;
+      }
+    }
+  }
+  spots.slice().sort((a, b) => (a.lane === 'D') - (b.lane === 'D') || (a.lane === 'D' ? 0 : a.lane - b.lane) || a.pos - b.pos).forEach((sp, i) => (sp.no = i + 1));
+  const seq = spots.slice().sort((a, b) => a.x - b.x || a.y - b.y);
+  seq.forEach((sp, i) => (sp.seq = i));
+  return { pattern, spots, seq, lanes, desc, spareW, fallback, doorSlack, name: PATTERNS[pattern].name, no: PATTERNS[pattern].no };
+}
+function posText(sp){ if (!sp) return ''; return sp.lane === 'D' ? `Doors, turned ${sp.pos}` : `Lane ${sp.lane}, spot ${sp.pos}`; }
+function layoutUnits(units, fs){
+  const per = fs.seq.length, nC = per ? Math.ceil(units.length / per) : 0, containers = [];
+  let order = 0;
+  for (let c = 0; c < nC; c++) {
+    const us = units.slice(c * per, (c + 1) * per);
+    const C = { idx: c, place: [], weight: 0, pallets: 0, boxes: 0 };
+    us.forEach((u, k) => {
+      const pl = { u, spot: fs.seq[k], oB: ++order, oT: u.top ? ++order : null };
+      C.place.push(pl);
+      for (const p of [u.bottom, u.top]) if (p) { C.weight += p.weight; C.pallets++; C.boxes += p.count; }
+    });
+    containers.push(C);
+  }
+  return { fs, containers, nC, per, units };
+}
+function roomLeft(res, lay){
+  const out = { freeSpots: 0, freePallets: 0, perSize: [] };
+  if (!lay || !lay.nC) return out;
+  out.freeSpots = lay.nC * lay.per - lay.units.length;
+  const lim = res.stackLim;
+  for (const s of res.sizes) {
+    if (!s.o) continue;
+    const fullH = S.pallet.H + s.o.layers * s.o.h;
+    const two = S.rules.stackable && 2 * fullH <= lim + E;
+    const onTop = S.rules.stackable ? lay.units.filter(u => !u.top && u.bottom.flat && u.bottom.height + fullH <= lim + E).length : 0;
+    const pallets = out.freeSpots * (two ? 2 : 1) + onTop;
+    out.perSize.push({ s, pallets, boxes: pallets * s.o.cap });
+  }
+  out.freePallets = out.perSize.length ? out.perSize[0].pallets : 0;
+  return out;
+}
+function pairPallets(pallets, limH, limW){
+  // 1) "Hard" pallets first: part-full top (must go on top) or too tall/heavy to stack on a twin.
+  //    Each gets the tallest partner that still fits (best fit), same shipment and lowest number first.
+  // 2) The rest pair in pallet-number order so the plan is easy to follow.
+  // Heavier flat pallet at the bottom; a part-full pallet is always on top.
+  const fits = (a, b) => a.height + b.height <= limH + E && a.weight + b.weight <= limW + E && (a.flat || b.flat);
+  const hard = p => !p.flat || 2 * p.height > limH + E || 2 * p.weight > limW + E;
+  const units = [], used = new Set();
+  const make = (a, b) => {
+    let bot = a, top = b;
+    if (!bot.flat || (top.flat && top.weight > bot.weight)) { bot = b; top = a; }
+    used.add(a); used.add(b); units.push({ bottom: bot, top });
+  };
+  const order = (a, b) => a.si - b.si || a.n - b.n;
+  const H = pallets.filter(hard).sort((a, b) => (b.height - a.height > 0.5 ? 1 : a.height - b.height > 0.5 ? -1 : 0) || order(a, b));
+  for (const x of H) {
+    if (used.has(x)) continue;
+    let best = null;
+    for (const c of pallets) {
+      if (c === x || used.has(c) || !fits(x, c)) continue;
+      if (hard(c) && c.flat === false && x.flat === false) continue;
+      if (!best) { best = c; continue; }
+      const key = p => [hard(p) ? 1 : 0, p.si === x.si ? 0 : 1, p.sizes[0] === x.sizes[0] ? 0 : 1, -p.height, p.n];
+      const ka = key(c), kb = key(best);
+      for (let i = 0; i < ka.length; i++) { if (Math.abs(ka[i] - kb[i]) > 1e-6) { if (ka[i] < kb[i]) best = c; break; } }
+    }
+    if (best) make(x, best);
+  }
+  const rest = pallets.filter(p => !used.has(p)).sort(order);
+  for (let i = 0; i < rest.length; i++) {
+    const a = rest[i]; if (used.has(a)) continue;
+    let j = i + 1; while (j < rest.length && (used.has(rest[j]) || !fits(a, rest[j]))) j++;
+    if (j < rest.length && rest[j].si === a.si) make(a, rest[j]);
+  }
+  const left = pallets.filter(p => !used.has(p)).sort(order);
+  for (let i = 0; i < left.length; i++) {
+    const a = left[i]; if (used.has(a)) continue;
+    const b = left.find(q => q !== a && !used.has(q) && fits(a, q));
+    if (b) make(a, b); else { used.add(a); units.push({ bottom: a, top: null }); }
+  }
+  return units;
+}
+function seaPlan(res, msg){
+  const cont = res.cont;
+  const stackLim = Math.min(S.rules.stackMax, cont.H - 5);
+  res.stackLim = stackLim;
+  let units;
+  if (S.rules.stackable) {
+    units = pairPallets(res.pallets, stackLim, S.rules.stackWtMax);
+    const minPair = res.pallets.length > 1 ? Math.min(...res.pallets.map(p => p.height)) * 2 : 0;
+    if (res.pallets.length > 1 && !units.some(u => u.top) && minPair > stackLim) msg('warn', `Pallets can't be stacked 2 high in a ${cont.name}: two pallets are over the ${fL(stackLim)} limit (inside height ${fL(cont.H)}). A High Cube container or lower pallets would allow stacking.`);
+  } else units = res.pallets.map(p => ({ bottom: p, top: null }));
+  units.forEach(u => { u.h = u.bottom.height + (u.top ? u.top.height : 0); u.w = u.bottom.weight + (u.top ? u.top.weight : 0); });
+  units.sort((a, b) => Math.min(a.bottom.si, a.top ? a.top.si : 99) - Math.min(b.bottom.si, b.top ? b.top.si : 99) || Math.min(a.bottom.n, a.top ? a.top.n : 1e9) - Math.min(b.bottom.n, b.top ? b.top.n : 1e9));
+  res.units = units;
+  res.layouts = {};
+  for (const pat of ['straight', 'lanes']) res.layouts[pat] = layoutUnits(units, floorSpots(cont, res.P, res.Q, pat, pat === 'straight' && S.sea.doorSpot));
+  const actKey = res.layouts[S.sea.pattern] && !res.layouts[S.sea.pattern].fs.fallback ? S.sea.pattern : 'straight';
+  const lay = res.layout = res.layouts[actKey];
+  res.spots = lay.fs;
+  if (!lay.fs.spots.length) { msg('error', 'The pallet does not fit in this container.'); return; }
+  if (res.layouts.lanes.fs.fallback) msg('info', `Two lanes need ${fL(res.P + res.Q, 0)} of width, wider than this container (${fL(cont.W, 0)}). Only straight rows are possible.`);
+  // apply the active layout to the pallets
+  for (const C of lay.containers) for (const pl of C.place) {
+    const u = pl.u;
+    for (const [p, lvl, o] of [[u.bottom, u.top ? 'bottom' : 'floor', pl.oB], [u.top, 'top', pl.oT]]) {
+      if (!p) continue;
+      p.unit = u; p.spot = pl.spot; p.level = lvl; p.cont = C.idx; p.order = o; p.partner = lvl === 'bottom' ? u.top : lvl === 'top' ? u.bottom : null;
+    }
+  }
+  res.containers = lay.containers;
+  for (const C of lay.containers) {
+    if (C.weight > cont.payload) msg('error', `Container ${C.idx + 1} is ${fW(C.weight)}, over the ${cont.name} payload of about ${fW(cont.payload)}.`);
+    else if (C.weight > US_ROAD_KG) msg('warn', `Container ${C.idx + 1} carries ${fW(C.weight)}. Over about 19,900 kg (44,000 lb) of cargo may exceed US road weight limits. Check with your forwarder.`);
+  }
+  const stacks = units.filter(u => u.top).length, singles = units.length - stacks;
+  const opt = `Option ${lay.fs.no} (${lay.fs.name.toLowerCase()})`;
+  if (lay.nC > 1) {
+    const last = lay.containers[lay.nC - 1];
+    msg('warn', `With ${opt} this plan needs <b>${lay.nC} x ${cont.name}</b>: ${lay.per} floor spots per container, and you have ${units.length} (${stacks} stacks${singles ? ` + ${singles} single` : ''}). The last container carries only ${last.pallets} pallet${last.pallets > 1 ? 's' : ''}.`);
+  } else msg('ok', `With ${opt} everything fits in one ${cont.name}: ${units.length} of ${lay.per} floor spots used (${stacks} stacks${singles ? `, ${singles} single` : ''}).`);
+  const otherKey = actKey === 'lanes' ? 'straight' : 'lanes', other = res.layouts[otherKey];
+  if (!other.fs.fallback && other.nC && other.nC !== lay.nC) {
+    const o2 = `Option ${other.fs.no} (${other.fs.name.toLowerCase()})`;
+    msg(other.nC < lay.nC ? 'warn' : 'info', `${o2} needs ${other.nC} container${other.nC > 1 ? 's' : ''} (${other.per} floor spots each) instead of ${lay.nC}.${other.nC < lay.nC ? ' Switch to it under Container.' : ''}`);
+  }
+  const lf = res.layouts.lanes.fs;
+  if (!lf.fallback && actKey === 'lanes') msg('info', `Two lanes: ${fL(lf.spareW, 1)} spare across the width. Spare at the doors: ${lf.lanes.map(l => `lane ${l.lane} ${fL(l.spare, 0)}`).join(', ')}, so the doors close easily.`);
+  if (actKey === 'straight' && lay.fs.doorSlack != null) msg('warn', `Turned pallets at the doors leave only ${fL(lay.fs.doorSlack, 1)} spare. Confirm with your forwarder before planning on it.`);
+  const tallStack = units.filter(u => u.top && u.h > cont.dH - 5);
+  if (tallStack.length) msg('info', `${tallStack.length} stack${tallStack.length > 1 ? 's are' : ' is'} taller than the door opening (${fL(cont.dH)}). Put the bottom pallet in first and lift the top pallet on inside the container.`);
+  const heavyTop = units.filter(u => u.top && u.top.weight > u.bottom.weight + 1);
+  if (heavyTop.length) msg('info', `${heavyTop.length} stack${heavyTop.length > 1 ? 's have' : ' has'} a heavier pallet on top because the heavier one has a part-filled top layer. Within the weight limit, but check it is stable.`);
+  const lonely = units.filter(u => !u.top && !u.bottom.flat && S.rules.stackable);
+  if (lonely.length) msg('info', `${lonely.length} pallet${lonely.length > 1 ? 's stand' : ' stands'} alone because the top layer is only part full.`);
+  const room = roomLeft(res, lay);
+  if (room.perSize.length && room.perSize[0].pallets > 0) {
+    const r0 = room.perSize[0];
+    msg('info', `Room left in the last container: about <b>${r0.pallets} more pallet${r0.pallets > 1 ? 's' : ''}</b> (${room.perSize.map(r => `about ${r.boxes} boxes of ${fDims(r.s.a, r.s.b, r.s.h)}`).join(', or ')}).`);
+  }
+  res.room = room;
+}
+function compareOptions(res){
+  const rows = [];
+  for (const [k, c] of Object.entries(CONTAINERS)) {
+    const lim = Math.min(S.rules.stackMax, c.H - 5);
+    const units = S.rules.stackable ? pairPallets(res.pallets, lim, S.rules.stackWtMax) : res.pallets.map(p => ({ bottom: p, top: null }));
+    const stacks = units.filter(u => u.top).length;
+    for (const pat of ['straight', 'lanes']) {
+      const fs = floorSpots(c, res.P, res.Q, pat, false);
+      if (fs.fallback || !fs.spots.length) continue;
+      const per = fs.spots.length, nC = Math.ceil(units.length / per);
+      const lastUsed = units.length - (nC - 1) * per;
+      const main = res.sizes.find(z => z.o);
+      const two = S.rules.stackable && main && 2 * (S.pallet.H + main.o.layers * main.o.h) <= lim + E;
+      rows.push({ k, c, pat, no: fs.no, name: fs.name, per, nC, units: units.length, stacks, two, maxPallets: per * (two ? 2 : 1), lastFill: Math.round(lastUsed / per * 100) });
+    }
+  }
+  return rows;
+}
+
+/* ---------------- air plan ---------------- */
+function airPlan(res, msg){
+  const d = S.air.divisor || 6000;
+  const rows = res.pallets.map(p => {
+    const vol = res.P * res.Q * p.height / d;
+    return { p, vol, gross: p.weight, charge: Math.max(vol, p.weight) };
+  });
+  const loose = res.ships.flatMap(s => s.boxes).reduce((a, b) => { a.w += b.wt; a.v += b.L * b.W * b.H / d; return a; }, { w: 0, v: 0 });
+  res.air = { rows, gross: rows.reduce((a, r) => a + r.gross, 0), vol: rows.reduce((a, r) => a + r.vol, 0), charge: rows.reduce((a, r) => a + r.charge, 0), loose };
+  res.pallets.forEach((p, i) => { p.order = i + 1; p.level = 'floor'; p.partner = null; });
+  msg('info', `Air freight: pallets are not stacked. Height limit ${fL(res.maxH)} (${esc(AIRCRAFT[S.air.craft]?.name || 'custom')}). Chargeable weight uses L x W x H cm / ${d}.`);
+}
+
+/* ---------------- 2D drawings (SVG) ---------------- */
+function stripeDefs(list){
+  const seen = new Set(); let d = '';
+  for (const s of list) {
+    if (!s) continue; const id = 'st' + s.join('').replace(/[^a-z0-9]/gi, '');
+    if (seen.has(id)) continue; seen.add(id);
+    d += `<pattern id="${id}" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" fill="${s[0]}"/><rect width="3" height="6" fill="${s[1]}"/></pattern>`;
+  }
+  return d ? `<defs>${d}</defs>` : '';
+}
+function fillRef(f){ return f.stripe ? `url(#st${f.stripe.join('').replace(/[^a-z0-9]/gi, '')})` : f.fill; }
+function layerSVG(p, li, opts = {}){
+  const P = R.P, Q = R.Q, L = p.layers[li];
+  const m = 3;
+  const fills = L.boxes.map(b => boxFill(b));
+  let s = `<svg viewBox="${-m} ${-m} ${P + 2 * m} ${Q + 2 * m + 7}" width="100%" style="display:block" role="img" aria-label="Layer ${li + 1} of pallet ${esc(p.id)}">${stripeDefs(fills.map(f => f.stripe))}`;
+  s += `<rect x="${-m}" y="${-m}" width="${P + 2 * m}" height="${Q + 2 * m}" rx="2" fill="#c9a36a" stroke="#8a6a3a" stroke-width=".6"/>`;
+  L.rects.forEach((r, k) => {
+    const b = L.boxes[k];
+    if (!b) { s += `<rect x="${r.x + .8}" y="${r.y + .8}" width="${r.w - 1.6}" height="${r.h - 1.6}" rx="1" fill="none" stroke="#6b5230" stroke-width=".5" stroke-dasharray="2 1.5"/><text x="${r.x + r.w / 2}" y="${r.y + r.h / 2 + 1.5}" font-size="${Math.min(r.w, r.h) * .13}" text-anchor="middle" fill="#6b5230">empty</text>`; return; }
+    const f = fills[k], info = skuInfo(b.sku);
+    s += `<rect x="${r.x + .5}" y="${r.y + .5}" width="${r.w - 1}" height="${r.h - 1}" rx="1.2" fill="${fillRef(f)}" stroke="#1b2330" stroke-width=".45"/>`;
+    const mn = Math.min(r.w, r.h), ins = mn * .1;
+    s += `<rect x="${r.x + ins}" y="${r.y + ins}" width="${r.w - 2 * ins}" height="${r.h - 2 * ins}" rx="1.5" fill="#fff" fill-opacity=".93"/>`;
+    const cx = r.x + r.w / 2, iw = r.w - 2 * ins, ih = r.h - 2 * ins, top = r.y + ins;
+    const lines = [];
+    if (info.size) lines.push({ t: info.size, f: Math.min(ih * .24, iw * .82 / (info.size.length * .68 + .1)), w: 800, c: '#1b2330' });
+    if (info.colour) lines.push({ t: info.colour, f: .1, w: 700, c: '#3a4250' });
+    lines.push({ t: info.style, f: .09, w: 400, c: '#56606e' });
+    lines.push({ t: fDimsCm(b.L, b.W, b.H), f: .09, w: 700, c: '#1b2330' });
+    lines.push({ t: '#' + b.n + (p.ships.length > 1 ? ' ' + shipCode(b.si) : ''), f: .15, w: 800, c: shipColor(b.si) });
+    const base = Math.min(ih, iw * 1.4);
+    lines.forEach(l => { if (l.f < 1) l.f = Math.min(base * l.f, iw / (Math.max(3, String(l.t).length) * .56)); });
+    const tot = lines.reduce((a, l) => a + l.f * 1.18, 0);
+    let y = top + (ih - tot) / 2;
+    for (const l of lines) { y += l.f * 1.0; s += `<text x="${cx}" y="${y}" font-size="${l.f.toFixed(2)}" font-weight="${l.w}" text-anchor="middle" fill="${l.c}">${esc(l.t)}</text>`; y += l.f * .18; }
+    if (Math.abs(b.H - L.h) > 1 && L.orient.upright) s += `<rect x="${r.x + r.w - 15}" y="${r.y + 1}" width="14" height="4.4" rx="1" fill="#1a8a4a"/><text x="${r.x + r.w - 8}" y="${r.y + 4.3}" font-size="3" font-weight="700" fill="#fff" text-anchor="middle">${trimNum(b.H.toFixed(0))} cm</text>`;
+  });
+  s += `<text x="${P / 2}" y="${Q + m + 5.5}" font-size="4" text-anchor="middle" fill="#5d6878">${esc(fL(P))} side</text></svg>`;
+  return s;
+}
+function containerSVG(C, lay, opts = {}){
+  const cont = R.cont, L = cont.L, W = cont.W, fs = lay.fs;
+  const mx = 50, my = 34;
+  let s = `<svg viewBox="${-mx} ${-my} ${L + 2 * mx} ${W + 2 * my}" width="100%" style="display:block" role="img" aria-label="Option ${fs.no} container ${C.idx + 1} floor plan">`;
+  s += `<defs><pattern id="hatch" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="10" height="10" fill="#f5f7fa"/><line x1="0" y1="0" x2="0" y2="10" stroke="#d3d9e1" stroke-width="4"/></pattern></defs>`;
+  s += `<rect x="0" y="0" width="${L}" height="${W}" fill="#f5f7fa" stroke="#1b2330" stroke-width="3"/>`;
+  s += `<rect x="${L}" y="-6" width="7" height="${W + 12}" fill="#1b2330"/>`;
+  s += `<text x="${-mx / 2}" y="${W / 2}" font-size="15" font-weight="800" text-anchor="middle" transform="rotate(-90 ${-mx / 2} ${W / 2})" fill="#1b2330">FRONT</text>`;
+  s += `<text x="${L + mx / 2 + 4}" y="${W / 2}" font-size="15" font-weight="800" text-anchor="middle" transform="rotate(90 ${L + mx / 2 + 4} ${W / 2})" fill="#1b2330">DOORS</text>`;
+  // lane labels and spare space at the doors
+  fs.lanes.forEach(ln => {
+    const top = ln.y + ln.across / 2 < W / 2;
+    const ly = top ? -10 : W + 22;
+    s += `<text x="4" y="${ly}" font-size="13" font-weight="700" fill="#1b2330">Lane ${ln.lane}: ${ln.n} pallets · ${esc(fL(ln.across, 0))} side across · ${esc(fL(ln.along, 0))} along</text>`;
+    if (ln.spare > 8) {
+      const x0 = ln.n * ln.along;
+      s += `<rect x="${x0 + 2}" y="${ln.y + 2}" width="${ln.spare - 4}" height="${ln.across - 4}" fill="url(#hatch)" stroke="#c9d0d9" stroke-dasharray="4 3"/>`;
+      s += `<text x="${x0 + ln.spare / 2}" y="${ln.y + ln.across / 2 - 2}" font-size="${Math.min(13, ln.spare / 5)}" text-anchor="middle" fill="#5d6878" font-weight="700">spare</text><text x="${x0 + ln.spare / 2}" y="${ln.y + ln.across / 2 + 13}" font-size="${Math.min(12, ln.spare / 5.5)}" text-anchor="middle" fill="#5d6878">${esc(fL(ln.spare, 0))}</text>`;
+    }
+  });
+  const bySpot = new Map(C.place.map(pl => [pl.spot, pl]));
+  fs.spots.forEach(sp => {
+    const pl = bySpot.get(sp);
+    const lab = `<text x="${sp.x + 9}" y="${sp.y + 17}" font-size="12" font-weight="800" fill="#5d6878">${sp.no}</text>`;
+    if (!pl) { s += `<rect x="${sp.x + 3}" y="${sp.y + 3}" width="${sp.w - 6}" height="${sp.d - 6}" rx="6" fill="#fff" stroke="#b9c2cf" stroke-width="1.5" stroke-dasharray="6 4"/>${lab}<text x="${sp.x + sp.w / 2}" y="${sp.y + sp.d / 2 + 5}" font-size="14" text-anchor="middle" fill="#8a94a3">free</text>`; return; }
+    const u = pl.u, b = u.bottom, t = u.top;
+    s += `<rect x="${sp.x + 3}" y="${sp.y + 3}" width="${sp.w - 6}" height="${sp.d - 6}" rx="6" fill="${shipLight(b.si)}" stroke="${shipColor(b.si)}" stroke-width="2.5"/>${lab}`;
+    const cx = sp.x + sp.w / 2, f = Math.min(sp.w * .19, sp.d * .17);
+    if (t) {
+      s += `<text x="${cx}" y="${sp.y + sp.d * .25}" font-size="${f * .5}" text-anchor="middle" fill="#5d6878">TOP</text>`;
+      s += `<text x="${cx}" y="${sp.y + sp.d * .25 + f * 1.05}" font-size="${f}" font-weight="800" text-anchor="middle" fill="${shipColor(t.si)}">${esc(t.id)}</text>`;
+      s += `<line x1="${sp.x + 12}" y1="${sp.y + sp.d / 2 + 6}" x2="${sp.x + sp.w - 12}" y2="${sp.y + sp.d / 2 + 6}" stroke="${shipColor(b.si)}" stroke-dasharray="5 4"/>`;
+      s += `<text x="${cx}" y="${sp.y + sp.d / 2 + 6 + f * 1.15}" font-size="${f}" font-weight="800" text-anchor="middle" fill="${shipColor(b.si)}">${esc(b.id)}</text>`;
+      s += `<text x="${cx}" y="${sp.y + sp.d / 2 + 6 + f * 1.75}" font-size="${f * .5}" text-anchor="middle" fill="#5d6878">BOTTOM · ${esc(fL(u.h, 0))}</text>`;
+    } else {
+      s += `<text x="${cx}" y="${sp.y + sp.d / 2 + f * .35}" font-size="${f}" font-weight="800" text-anchor="middle" fill="${shipColor(b.si)}">${esc(b.id)}</text>`;
+      s += `<text x="${cx}" y="${sp.y + sp.d / 2 + f * .95}" font-size="${f * .5}" text-anchor="middle" fill="#c0262d" font-weight="700">SINGLE · ${esc(fL(u.h, 0))}</text>`;
+    }
+  });
+  return s + '</svg>';
+}
+function sideSVG(C, lay, lane){
+  const cont = R.cont, L = cont.L, H = cont.H;
+  const mx = 50, my = 22;
+  const places = C.place.filter(pl => pl.spot.lane === lane).sort((a, b) => a.spot.x - b.spot.x);
+  let s = `<svg viewBox="${-mx} ${-my} ${L + 2 * mx} ${H + 2 * my + 8}" width="100%" style="display:block" role="img" aria-label="Lane ${lane} side view">`;
+  s += `<rect x="0" y="0" width="${L}" height="${H}" fill="#fbfcfd" stroke="#1b2330" stroke-width="3"/>`;
+  s += `<line x1="${L - 70}" y1="${H - cont.dH}" x2="${L}" y2="${H - cont.dH}" stroke="#c0262d" stroke-width="2" stroke-dasharray="6 4"/><text x="${L - 74}" y="${H - cont.dH + 4}" font-size="13" text-anchor="end" fill="#c0262d">door ${esc(fL(cont.dH, 0))}</text>`;
+  s += `<text x="${-8}" y="${14}" font-size="13" text-anchor="end" fill="#5d6878">${esc(fL(H, 0))}</text>`;
+  s += `<text x="6" y="${-7}" font-size="14" font-weight="800" fill="#1b2330">Lane ${lane} side view</text>`;
+  for (const pl of places) {
+    const u = pl.u, x = pl.spot.x, w = pl.spot.w; let y = H;
+    for (const p of [u.bottom, u.top]) {
+      if (!p) continue;
+      const ph = p.height;
+      s += `<rect x="${x + 3}" y="${y - S.pallet.H}" width="${w - 6}" height="${S.pallet.H}" fill="#b58a52"/>`;
+      s += `<rect x="${x + 3}" y="${y - ph}" width="${w - 6}" height="${ph - S.pallet.H}" fill="${shipLight(p.si)}" stroke="${shipColor(p.si)}" stroke-width="2"/>`;
+      s += `<text x="${x + w / 2}" y="${y - ph / 2 + 6}" font-size="${Math.min(17, w / 5.5)}" font-weight="800" text-anchor="middle" fill="${shipColor(p.si)}">${esc(p.id)}</text>`;
+      y -= ph;
+    }
+    s += `<text x="${x + w / 2}" y="${y - 5}" font-size="12" text-anchor="middle" fill="#1b2330">${esc(fL(u.h, 0))}</text>`;
+  }
+  return s + '</svg>';
+}
+
+/* ---------------- 3D ---------------- */
+const T = { r: null, scene: null, cam: null, ctl: null, group: null, key: null, mount: null, ro: null };
+function has3D(){ return typeof window.THREE !== 'undefined'; }
+function ensure3D(){
+  if (!has3D()) return false;
+  if (T.r) return true;
+  T.r = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+  T.r.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  T.scene = new THREE.Scene(); T.scene.background = new THREE.Color(0xeef2f7);
+  T.cam = new THREE.PerspectiveCamera(38, 1, 1, 50000);
+  if (THREE.OrbitControls) { T.ctl = new THREE.OrbitControls(T.cam, T.r.domElement); T.ctl.enableDamping = true; T.ctl.dampingFactor = .08; T.ctl.maxPolarAngle = Math.PI / 2 - .02; }
+  T.scene.add(new THREE.HemisphereLight(0xffffff, 0x9aa6b5, .75));
+  const dl = new THREE.DirectionalLight(0xffffff, .6); dl.position.set(300, 800, 500); T.scene.add(dl);
+  const dl2 = new THREE.DirectionalLight(0xffffff, .25); dl2.position.set(-400, 300, -300); T.scene.add(dl2);
+  T.group = new THREE.Group(); T.scene.add(T.group);
+  T.ro = new ResizeObserver(() => size3D());
+  const loop = () => { requestAnimationFrame(loop); if (T.mount && T.mount.isConnected) { if (T.ctl) T.ctl.update(); T.r.render(T.scene, T.cam); } };
+  loop();
+  return true;
+}
+function size3D(){ if (!T.mount || !T.mount.isConnected) return; const w = T.mount.clientWidth, h = T.mount.clientHeight; if (!w || !h) return; T.r.setSize(w, h, false); T.cam.aspect = w / h; T.cam.updateProjectionMatrix(); }
+function clear3D(){
+  T.group.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material) (Array.isArray(o.material) ? o.material : [o.material]).forEach(m => m.dispose()); });
+  while (T.group.children.length) T.group.remove(T.group.children[0]);
+}
+function mount3D(el, key, build){
+  if (!ensure3D()) { el.innerHTML = '<div class="no3d">The 3D view needs an internet connection to load. The 2D plans on this page still work.</div>'; return; }
+  el.prepend(T.r.domElement);
+  if (T.ro) { T.ro.disconnect(); T.ro.observe(el); }
+  T.mount = el; size3D();
+  clear3D();
+  const b = build(T.group);
+  if (T.key !== key && b) {
+    const d = Math.max(b.x, b.y * 1.4, b.z) * 1.35 + 60;
+    T.cam.position.set(d * .75, d * .62, d * .95); if (T.ctl) { T.ctl.target.set(0, b.y / 2, 0); T.ctl.update(); } else T.cam.lookAt(0, b.y / 2, 0);
+    T.key = key;
+  }
+}
+function col3(f){ const c = new THREE.Color(); try { c.setStyle(f.fill); } catch (e) { c.set(0xcccccc); } return c; }
+function palletMesh(g, P, Q, H, x, z, rot){
+  const mat = new THREE.MeshLambertMaterial({ color: 0xb58a52 });
+  const top = new THREE.Mesh(new THREE.BoxGeometry(P, Math.min(2.2, H * .2), Q), mat);
+  top.position.set(0, H - Math.min(2.2, H * .2) / 2, 0);
+  const bot = new THREE.Mesh(new THREE.BoxGeometry(P, Math.min(1.8, H * .15), Q), mat.clone());
+  bot.position.set(0, Math.min(1.8, H * .15) / 2, 0);
+  const grp = new THREE.Group(); grp.add(top, bot);
+  const bh = H - Math.min(2.2, H * .2) - Math.min(1.8, H * .15);
+  const blockGeo = new THREE.BoxGeometry(12, bh, 12);
+  for (const fx of [-.5, 0, .5]) for (const fz of [-.5, 0, .5]) {
+    const m = new THREE.Mesh(blockGeo, mat.clone());
+    m.position.set(fx * (P - 12), Math.min(1.8, H * .15) + bh / 2, fz * (Q - 12)); grp.add(m);
+  }
+  grp.position.set(x, 0, z); if (rot) grp.rotation.y = Math.PI / 2;
+  g.add(grp); return grp;
+}
+function build3DPallet(p){
+  return g => {
+    const P = R.P, Q = R.Q, pal = S.pallet;
+    palletMesh(g, P, Q, pal.H, 0, 0, false);
+    let y = pal.H;
+    const edgeMat = new THREE.LineBasicMaterial({ color: 0x1b2330, transparent: true, opacity: .35 });
+    for (const L of p.layers) {
+      L.boxes.forEach((b, k) => {
+        const r = L.rects[k]; const bh = L.orient.upright ? b.H : L.h;
+        const geo = new THREE.BoxGeometry(r.w * .985, bh * .985, r.h * .985);
+        const m = new THREE.Mesh(geo, new THREE.MeshLambertMaterial({ color: col3(boxFill(b)) }));
+        m.position.set(r.x + r.w / 2 - P / 2, y + bh / 2, r.y + r.h / 2 - Q / 2);
+        m.add(new THREE.LineSegments(new THREE.EdgesGeometry(geo), edgeMat.clone()));
+        g.add(m);
+      });
+      y += L.h;
+    }
+    const floor = new THREE.Mesh(new THREE.PlaneGeometry(P * 4, Q * 4), new THREE.MeshLambertMaterial({ color: 0xdfe5ec }));
+    floor.rotation.x = -Math.PI / 2; floor.position.y = -.1; g.add(floor);
+    return { x: P, y: y, z: Q };
+  };
+}
+function build3DContainer(C, lay){
+  return g => {
+    const cont = R.cont, L = cont.L, W = cont.W, H = cont.H, P = R.P, Q = R.Q, pal = S.pallet;
+    const shell = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(L, H, W)), new THREE.LineBasicMaterial({ color: 0x1b2330 }));
+    shell.position.set(0, H / 2, 0); g.add(shell);
+    const floor = new THREE.Mesh(new THREE.PlaneGeometry(L, W), new THREE.MeshLambertMaterial({ color: 0xd9dee5 }));
+    floor.rotation.x = -Math.PI / 2; g.add(floor);
+    const wall = new THREE.Mesh(new THREE.PlaneGeometry(W, H), new THREE.MeshLambertMaterial({ color: 0xc3cad3, side: THREE.DoubleSide, transparent: true, opacity: .5 }));
+    wall.rotation.y = Math.PI / 2; wall.position.set(-L / 2, H / 2, 0); g.add(wall);
+    const items = [];
+    for (const pl of C.place) {
+      const u = pl.u, sp = pl.spot;
+      const rot = Math.abs(sp.w - P) > 1;
+      let base = 0;
+      for (const p of [u.bottom, u.top]) {
+        if (!p) continue;
+        const cx = sp.x + sp.w / 2 - L / 2, cz = sp.y + sp.d / 2 - W / 2;
+        palletMesh(g, P, Q, pal.H, cx, cz, rot).position.y = base;
+        let y = base + pal.H;
+        for (const Ly of p.layers) {
+          Ly.boxes.forEach((b, i) => {
+            const r = Ly.rects[i]; const bh = Ly.orient.upright ? b.H : Ly.h;
+            let lx = r.x + r.w / 2 - P / 2, lz = r.y + r.h / 2 - Q / 2, sw = r.w, sd = r.h;
+            if (rot) { [lx, lz] = [lz, lx]; [sw, sd] = [sd, sw]; }
+            items.push({ x: cx + lx, y: y + bh / 2, z: cz + lz, sx: sw * .97, sy: bh * .97, sz: sd * .97, c: col3(boxFill(b)) });
+          });
+          y += Ly.h;
+        }
+        base += p.height;
+      }
+    }
+    if (items.length) {
+      const mesh = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshLambertMaterial({ color: 0xffffff }), items.length);
+      const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), v = new THREE.Vector3(), sc = new THREE.Vector3();
+      items.forEach((it, i) => { m4.compose(v.set(it.x, it.y, it.z), q, sc.set(it.sx, it.sy, it.sz)); mesh.setMatrixAt(i, m4); mesh.setColorAt(i, it.c); });
+      mesh.instanceMatrix.needsUpdate = true; if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+      g.add(mesh);
+    }
+    return { x: L * .62, y: H, z: W };
+  };
+}
+function export3D(){
+  if (!T.r || !T.mount || !T.mount.isConnected) { toast('Open a 3D view first'); return; }
+  T.r.render(T.scene, T.cam);
+  const a = document.createElement('a'); a.download = (T.key || 'view') + '.png'; a.href = T.r.domElement.toDataURL('image/png'); a.click();
+}
+
+/* ---------------- sidebar ---------------- */
+function numInput(key, type, attrs = ''){
+  const v = getPath(S, key);
+  const shown = type === 'len' ? lenVal(v) : type === 'wt' ? wtVal(v, 1) : v;
+  return `<input class="inp" type="number" step="any" data-k="${key}" data-t="${type}" value="${esc(shown)}" ${attrs}>`;
+}
+function renderSide(){
+  const pal = S.pallet, c = CONTAINERS[S.sea.type], sea = S.mode === 'sea';
+  const presetOpts = Object.entries(PALLETS).map(([k, p]) => `<option value="${k}" ${pal.preset === k ? 'selected' : ''}>${esc(p.name)}</option>`).join('');
+  const contOpts = Object.entries(CONTAINERS).map(([k, p]) => `<option value="${k}" ${S.sea.type === k ? 'selected' : ''}>${esc(p.name)}</option>`).join('');
+  const airOpts = Object.entries(AIRCRAFT).map(([k, p]) => `<option value="${k}" ${S.air.craft === k ? 'selected' : ''}>${esc(p.name)}</option>`).join('');
+  $('#side').innerHTML = `
+  <div class="card">
+    <span class="lbl">Shipping mode</span>
+    <div class="seg" data-seg="mode"><button data-v="sea" class="${sea ? 'on' : ''}">Sea (container)</button><button data-v="air" class="${!sea ? 'on' : ''}">Air freight</button></div>
+    <div class="grid2" style="margin-top:10px">
+      <div><span class="lbl">Length</span><div class="seg" data-seg="units"><button data-v="in" class="${S.units === 'in' ? 'on' : ''}">in</button><button data-v="cm" class="${S.units === 'cm' ? 'on' : ''}">cm</button></div></div>
+      <div><span class="lbl">Weight</span><div class="seg" data-seg="wunits"><button data-v="lb" class="${S.wunits === 'lb' ? 'on' : ''}">lb</button><button data-v="kg" class="${S.wunits === 'kg' ? 'on' : ''}">kg</button></div></div>
+    </div>
+    <div style="margin-top:10px"><span class="lbl">Colour boxes by</span>
+      <select class="sel" data-k="colorBy" data-t="str"><option value="product" ${S.colorBy === 'product' ? 'selected' : ''}>Product colour (from SKU)</option><option value="size" ${S.colorBy === 'size' ? 'selected' : ''}>Box size</option><option value="shipment" ${S.colorBy === 'shipment' ? 'selected' : ''}>Shipment</option></select></div>
+  </div>
+  <details class="card" open><summary>Pallet</summary><div class="body">
+    <div><span class="lbl">Pallet size</span><select class="sel" data-k="pallet.preset" data-t="preset">${presetOpts}</select></div>
+    ${pal.preset !== 'US' ? `<div class="warnbox">Amazon US needs 40 x 48 in pallets. A 120 x 80 cm (EUR/UK) pallet fits far fewer boxes per layer.</div>` : ''}
+    <div class="grid2"><div><span class="lbl">Length (${Lu()})</span>${numInput('pallet.L', 'len', pal.preset !== 'CUSTOM' ? 'disabled' : '')}</div><div><span class="lbl">Width (${Lu()})</span>${numInput('pallet.W', 'len', pal.preset !== 'CUSTOM' ? 'disabled' : '')}</div></div>
+    <div class="hl"><span class="lbl">Empty pallet height (${Lu()})</span>${numInput('pallet.H', 'len')}<div class="note" style="margin-top:4px">Measure the real pallet. This number decides how many layers fit.</div></div>
+    <div><span class="lbl">Empty pallet weight (${Wu()})</span>${numInput('pallet.wt', 'wt')}</div>
+  </div></details>
+  <details class="card" open><summary>Height & weight limits</summary><div class="body">
+    ${sea ? `
+    <label class="chk"><input type="checkbox" data-k="rules.stackable" data-t="bool" ${S.rules.stackable ? 'checked' : ''}><span><b>Stackable pallets</b> (2 high)</span></label>
+    ${S.rules.stackable ? `
+    <div class="grid2"><div><span class="lbl">Max per pallet (${Lu()})</span>${numInput('rules.perPalletMax', 'len')}</div><div><span class="lbl">Max stack of 2 (${Lu()})</span>${numInput('rules.stackMax', 'len')}</div></div>
+    <div class="note">Amazon: about 50 in per stackable pallet, 100 in for a stack of two.</div>` : `
+    <div><span class="lbl">Max pallet height (${Lu()})</span>${numInput('rules.singleMax', 'len')}</div><div class="note">Amazon: 72 in for a single pallet.</div>`}
+    ` : `
+    <div><span class="lbl">Aircraft</span><select class="sel" data-k="air.craft" data-t="craft">${airOpts}</select></div>
+    <div class="grid2"><div><span class="lbl">Max height (${Lu()})</span>${numInput('air.H', 'len', S.air.craft !== 'custom' ? 'disabled' : '')}</div><div><span class="lbl">Volume divisor</span>${numInput('air.divisor', 'num')}</div></div>
+    <div class="note">Also capped at the Amazon single-pallet limit of ${esc(fL(S.rules.singleMax, 0))}. Volume weight = L x W x H cm / divisor (6000 is standard for air freight).</div>`}
+    <div class="grid2"><div><span class="lbl">Max per pallet (${Wu()})</span>${numInput('rules.palletWtMax', 'wt')}</div>${sea && S.rules.stackable ? `<div><span class="lbl">Max per stack (${Wu()})</span>${numInput('rules.stackWtMax', 'wt')}</div>` : ''}</div>
+  </div></details>
+  <details class="card" open><summary>Packing rules</summary><div class="body">
+    <div class="note">Always on: no overhang, full flat layers, only the top layer can be part full, pallets with a part-full top go on top of a stack.</div>
+    <label class="chk"><input type="checkbox" data-k="rules.mixSizes" data-t="bool" ${S.rules.mixSizes ? 'checked' : ''}><span><b>Mix box sizes on a pallet</b><br><span class="note">Off: every pallet holds one box size (pallets grouped by size). On: fewer pallets.</span></span></label>
+    <label class="chk"><input type="checkbox" data-k="rules.mixShipments" data-t="bool" ${S.rules.mixShipments ? 'checked' : ''}><span><b>Let one pallet carry 2 shipments</b><br><span class="note">Only used when a shipment needs more pallets than its pallet labels.</span></span></label>
+    <label class="chk"><input type="checkbox" data-k="rules.onEnd" data-t="bool" ${S.rules.onEnd ? 'checked' : ''}><span><b>Allow boxes on their side</b><br><span class="note">Can fit more, but check "This side up" markings.</span></span></label>
+  </div></details>
+  ${sea ? `<details class="card" open><summary>Container</summary><div class="body">
+    <div><span class="lbl">Container type</span><select class="sel" data-k="sea.type" data-t="str">${contOpts}</select></div>
+    <div class="note">Inside ${esc(fDims(c.L, c.W, c.H))} · door ${esc(fDims(c.dW, c.dH, 0).replace(/ x 0 .*/, ''))} ${Lu()} · payload about ${esc(fW(c.payload))}. Typical sizes; check with your carrier.</div>
+    <div><span class="lbl">Loading option for pallet sheets</span><select class="sel" data-k="sea.pattern" data-t="str"><option value="straight" ${S.sea.pattern === 'straight' ? 'selected' : ''}>Option 1 · Straight rows (all ${esc(fL(Math.min(pal.L, pal.W), 0))} across)</option><option value="lanes" ${S.sea.pattern === 'lanes' ? 'selected' : ''}>Option 2 · Two lanes (${esc(fL(Math.max(pal.L, pal.W), 0))} + ${esc(fL(Math.min(pal.L, pal.W), 0))} across)</option></select></div>
+    <div class="note">The Container tab shows both options. The one chosen here is used for pallet sheets, print and Excel.</div>
+    <label class="chk"><input type="checkbox" data-k="sea.doorSpot" data-t="bool" ${S.sea.doorSpot ? 'checked' : ''}><span>Option 1: turn extra pallets into the space at the doors <span class="note">(only if it fits)</span></span></label>
+  </div></details>` : ''}
+  <div class="note" style="padding:0 4px">Rules and sizes are typical values. Always confirm the final plan with your forwarder.</div>`;
+}
+
+/* ---------------- tabs ---------------- */
+function renderTabs(){
+  const tabs = [['shipments', 'Shipments'], ['plan', 'Plan'], [S.mode === 'sea' ? 'container' : 'air', S.mode === 'sea' ? 'Container' : 'Air freight'], ['pallets', 'Pallets']];
+  if (ui.tab === 'container' && S.mode === 'air') ui.tab = 'air';
+  if (ui.tab === 'air' && S.mode === 'sea') ui.tab = 'container';
+  $('#tabs').innerHTML = tabs.map(([k, n]) => `<button data-tab="${k}" class="${ui.tab === k ? 'on' : ''}">${n}</button>`).join('');
+}
+function render(){
+  renderTabs();
+  const v = $('#view');
+  if (ui.tab === 'shipments') v.innerHTML = viewShipments();
+  else if (ui.tab === 'plan') v.innerHTML = viewPlan();
+  else if (ui.tab === 'container') { v.innerHTML = viewContainer(); after3DContainer(); }
+  else if (ui.tab === 'air') v.innerHTML = viewAir();
+  else if (ui.tab === 'pallets') { v.innerHTML = viewPallets(); after3DPallet(); }
+  $('#projName').value = S.name || '';
+}
+function msgsHTML(){
+  const icon = { error: 'Problem', warn: 'Check', info: 'Note', ok: 'OK' };
+  const order = { error: 0, warn: 1, ok: 2, info: 3 };
+  return `<div class="msgs">${R.msgs.slice().sort((a, b) => order[a.level] - order[b.level]).map(m => `<div class="msg ${m.level}"><b>${icon[m.level]}</b><span>${m.text}</span></div>`).join('')}</div>`;
+}
+function kpisHTML(){
+  const boxes = R.ships.reduce((a, s) => a + s.N, 0), units = R.ships.reduce((a, s) => a + s.units, 0);
+  const wt = R.pallets.reduce((a, p) => a + p.weight, 0);
+  let k = `<div class="kpi"><div class="k">Boxes</div><div class="v">${boxes.toLocaleString()}</div><div class="s">${units.toLocaleString()} units · ${R.ships.length} shipment${R.ships.length !== 1 ? 's' : ''}</div></div>
+  <div class="kpi"><div class="k">Pallets</div><div class="v">${R.pallets.length}</div><div class="s">${R.ships.map(s => `${shipCode(s.si)}: ${s.pallets.length}`).join(' · ')}</div></div>`;
+  if (S.mode === 'sea') {
+    const stacks = R.units.filter(u => u.top).length, per = R.layout ? R.layout.per : 0;
+    k += `<div class="kpi"><div class="k">Floor spots</div><div class="v">${R.units.length}</div><div class="s">${stacks} stacks of 2 · ${R.units.length - stacks} single · ${per} per container (Option ${R.layout ? R.layout.fs.no : ''})</div></div>
+    <div class="kpi dark"><div class="k">Containers</div><div class="v">${R.containers.length} x ${esc(R.cont.name.replace(' Standard', '').replace('High Cube', 'HQ'))}</div><div class="s">${R.containers.map((c, i) => `#${i + 1}: ${c.pallets} pallets`).join(' · ') || '-'}</div></div>`;
+  } else if (R.air) {
+    k += `<div class="kpi dark"><div class="k">Chargeable weight</div><div class="v">${fW(R.air.charge)}</div><div class="s">gross ${fW(R.air.gross)} · volume ${fW(R.air.vol)}</div></div>`;
+  }
+  k += `<div class="kpi"><div class="k">Total weight</div><div class="v">${fW(wt)}</div><div class="s">boxes + pallets</div></div>`;
+  return `<div class="kpis">${k}</div>`;
+}
+
+/* ---------------- Shipments view ---------------- */
+function viewShipments(){
+  let h = `<div class="row" style="margin-bottom:12px"><h2 style="margin:0">Shipments</h2><span class="spacer"></span>
+    <button class="btn" data-act="addShip">+ Add shipment</button>
+    <button class="btn primary" data-act="importNew">Import AWD / FBA upload file (.xlsx, .csv)</button></div>
+    <div class="note" style="margin-bottom:12px">Import the same Excel file you upload to Seller Central ("Merchant SKU, Units per box, Number of boxes, Box length / width / height, Box weight"). Box numbers follow Amazon's label order (SKU A to Z), so they match the printed box labels. Spot-check one label to be sure.</div>`;
+  if (!S.shipments.length) return h + `<div class="card empty">No shipments yet. Import an upload file, add one by hand, or click <b>Load example</b>.</div>`;
+  S.shipments.forEach((sh, si) => {
+    const shp = R.ships[si];
+    const sizes = [...new Set(shp.boxes.map(b => b.size))];
+    const pl = shp.pallets.length, lab = +sh.labels || 0;
+    h += `<div class="card" style="margin-bottom:14px">
+      <div class="shipHead"><div class="code" style="background:${shipColor(si)}">${shipCode(si)}</div>
+        <div style="flex:1;min-width:160px"><span class="lbl">Name</span><input class="inp" data-sh="${si}" data-f="name" value="${esc(sh.name)}"></div>
+        <div style="flex:1;min-width:170px"><span class="lbl">Amazon shipment ID</span><input class="inp mono" data-sh="${si}" data-f="sid" value="${esc(sh.sid)}"></div>
+        <div style="width:120px"><span class="lbl">Pallet labels</span><input class="inp" type="number" min="0" data-sh="${si}" data-f="labels" value="${esc(sh.labels)}"></div>
+        <div class="row" style="align-self:flex-end"><button class="btn small" data-act="importInto" data-si="${si}">Replace from file</button><button class="btn small danger" data-act="delShip" data-si="${si}">Delete</button></div></div>
+      <div class="row" style="margin-bottom:8px"><span class="badge">${shp.N} boxes</span><span class="badge">${shp.units.toLocaleString()} units</span><span class="badge">${sh.lines.length} lines</span>
+        ${sizes.map(s => `<span class="badge"><span class="swatch" style="background:${s.color};vertical-align:-2px"></span> ${esc(fDims(s.a, s.b, s.h))}: ${shp.boxes.filter(b => b.size === s).length}</span>`).join('')}
+        <span class="badge ${lab ? (pl === lab ? 'ok' : 'err') : ''}">${pl} pallets${lab ? ` / ${lab} labels` : ''}</span></div>
+      <div class="tblwrap"><table class="t"><thead><tr><th>SKU</th><th class="n">Units / box</th><th class="n">Boxes</th><th class="n">L (${Lu()})</th><th class="n">W (${Lu()})</th><th class="n">H (${Lu()})</th><th class="n">Weight / box (${Wu()})</th><th></th></tr></thead><tbody>
+      ${sh.lines.map((l, li) => `<tr>
+        <td><input data-sh="${si}" data-li="${li}" data-f="sku" value="${esc(l.sku)}" class="mono"></td>
+        <td class="n"><input type="number" step="any" data-sh="${si}" data-li="${li}" data-f="upb" value="${esc(l.upb)}"></td>
+        <td class="n"><input type="number" step="1" data-sh="${si}" data-li="${li}" data-f="boxes" value="${esc(l.boxes)}"></td>
+        <td class="n"><input type="number" step="any" data-sh="${si}" data-li="${li}" data-f="L" value="${lenVal(l.L)}"></td>
+        <td class="n"><input type="number" step="any" data-sh="${si}" data-li="${li}" data-f="W" value="${lenVal(l.W)}"></td>
+        <td class="n"><input type="number" step="any" data-sh="${si}" data-li="${li}" data-f="H" value="${lenVal(l.H)}"></td>
+        <td class="n"><input type="number" step="any" data-sh="${si}" data-li="${li}" data-f="wt" value="${wtVal(l.wt, 2)}"></td>
+        <td><button class="btn small danger" data-act="delLine" data-si="${si}" data-li="${li}" aria-label="Delete line">x</button></td></tr>`).join('')}
+      </tbody></table></div>
+      <div style="margin-top:8px"><button class="btn small" data-act="addLine" data-si="${si}">+ Add line</button></div></div>`;
+  });
+  return h;
+}
+
+/* ---------------- Plan view ---------------- */
+function tileHTML(p, sel){
+  const role = p.level === 'bottom' ? 'BOTTOM' : p.level === 'top' ? 'TOP' : S.mode === 'sea' ? 'SINGLE' : '';
+  const flags = [];
+  if (p.mixedShip) flags.push('2 shipments');
+  else if (p.sizes.length > 1) flags.push('mixed sizes');
+  if (!p.flat) flags.push('part-full top');
+  const dark = p.level === 'bottom';
+  return `<button class="tile ${sel ? 'on' : ''}" data-pallet="${p.uid}" style="border-color:${shipColor(p.si)};background:${dark ? shipColor(p.si) : shipLight(p.si)};color:${dark ? '#fff' : 'inherit'}">
+    <div class="id" style="color:${dark ? '#fff' : shipColor(p.si)}">${esc(p.id)}</div>
+    <div class="m" style="color:${dark ? 'rgba(255,255,255,.85)' : ''}">${p.count} boxes · ${esc(fL(p.height, 0))}</div>
+    <div class="f" style="color:${dark ? '#fff' : '#5d6878'}">${role}${flags.length ? ' · ' + flags.join(' · ') : ''}</div></button>`;
+}
+function sizeTableHTML(shp, noHead){
+  const sizes = R.sizes.filter(s => shp.boxes.some(b => b.size === s));
+  let h = noHead ? '' : `<div style="margin-top:10px"><b style="color:${shipColor(shp.si)}">Shipment ${shipCode(shp.si)}</b> ${esc(shp.sh.name && shp.sh.name.trim() !== 'Shipment ' + shipCode(shp.si) ? shp.sh.name : '')} <span class="mono">${esc(shp.sh.sid || '')}</span> · ${shp.N} boxes · ${shp.pallets.length} pallets${+shp.sh.labels ? ' / ' + shp.sh.labels + ' labels' : ''}</div>`;
+  h += `<table class="t" style="margin-bottom:10px"><thead><tr><th>Box size</th><th class="n">Boxes</th><th class="n">Per layer</th><th class="n">Max layers</th><th class="n">Per pallet</th><th>Pallets</th><th class="n">Full pallet height</th></tr></thead><tbody>`;
+  for (const s of sizes) {
+    const ps = shp.pallets.filter(p => p.sizes.includes(s.idx));
+    const n = shp.boxes.filter(b => b.size === s).length;
+    h += `<tr><td><span class="swatch" style="background:${s.color};vertical-align:-2px"></span> <b>${esc(fDims(s.a, s.b, s.h))}</b>${s.o && !s.o.upright ? ' <span class="badge warn">on side</span>' : ''}</td><td class="n">${n}</td>
+      <td class="n">${s.o ? s.o.TI : '-'}</td><td class="n">${s.o ? s.o.layers : '-'}</td><td class="n">${s.o ? s.o.cap : '-'}</td>
+      <td>${ps.length ? esc(ps[0].id) + (ps.length > 1 ? ' to ' + esc(ps[ps.length - 1].id) : '') + ` <span class="muted">(${ps.length})</span>` : '-'}</td>
+      <td class="n">${s.o ? esc(fL(S.pallet.H + s.o.layers * s.o.h)) : '-'}</td></tr>`;
+  }
+  return h + `</tbody></table>`;
+}
+function viewPlan(){
+  if (!R.pallets.length) return msgsHTML() + `<div class="card empty">Nothing to plan yet. Add shipments first.</div>`;
+  let h = kpisHTML() + msgsHTML();
+  for (const shp of R.ships) {
+    if (!shp.pallets.length) continue;
+    const sh = shp.sh, lab = +sh.labels || 0;
+    h += `<div class="card" style="margin-bottom:14px"><div class="shipHead"><div class="code" style="background:${shipColor(shp.si)}">${shipCode(shp.si)}</div>
+      <div><b style="font-size:16px">${esc(sh.name || 'Shipment ' + shipCode(shp.si))}</b><div class="mono muted">${esc(sh.sid || '')}</div></div><span class="spacer"></span>
+      <span class="badge">${shp.N} boxes</span><span class="badge ${lab ? (lab === shp.pallets.length ? 'ok' : 'err') : ''}">${shp.pallets.length} pallets${lab ? ' / ' + lab + ' labels' : ''}</span></div>`;
+    h += sizeTableHTML(shp, true);
+    // pallets grouped by main size
+    const groups = new Map();
+    for (const p of shp.pallets) {
+      const key = p.mixedShip ? 'x' : p.sizes.length > 1 ? 'm' : String(p.sizes[0]);
+      if (!groups.has(key)) groups.set(key, []); groups.get(key).push(p);
+    }
+    for (const [key, ps] of groups) {
+      let title;
+      if (key === 'x') title = 'Mixed shipment pallets';
+      else if (key === 'm') title = 'Mixed size pallets';
+      else { const s = R.sizes[+key]; title = `<span class="swatch" style="background:${s.color}"></span> Box size ${esc(fDims(s.a, s.b, s.h))}`; }
+      h += `<div class="group"><b>${title}</b><span class="muted">· ${esc(ps[0].id)}${ps.length > 1 ? ' to ' + esc(ps[ps.length - 1].id) : ''} · ${ps.length} pallet${ps.length > 1 ? 's' : ''} · ${ps.reduce((a, p) => a + p.count, 0)} boxes</span></div>`;
+      h += `<div class="tiles">${ps.map(p => tileHTML(p)).join('')}</div>`;
+    }
+    h += `</div>`;
+  }
+  return h;
+}
+
+/* ---------------- Container view ---------------- */
+function loadListHTML(C){
+  const rows = [];
+  C.place.slice().sort((a, b) => a.oB - b.oB).forEach(pl => {
+    const u = pl.u;
+    for (const [p, lvl, o] of [[u.bottom, u.top ? 'bottom' : 'single', pl.oB], [u.top, 'top', pl.oT]]) {
+      if (!p) continue;
+      rows.push(`<div><span class="o">${o}</span><span class="pill" style="background:${shipColor(p.si)}">${esc(p.id)}</span><span>${esc(posText(pl.spot))}, ${lvl}</span><span class="spacer"></span><span class="muted">${esc(fL(p.height, 0))} · ${esc(fW(p.weight))}</span></div>`);
+    }
+  });
+  return `<div class="load">${rows.join('')}</div>`;
+}
+function optionCard(key){
+  const lay = R.layouts[key], fs = lay.fs, active = R.layout === lay, C0 = lay.containers[0];
+  if (fs.fallback) return `<div class="card opt"><h3>Option ${PATTERNS[key].no} · ${PATTERNS[key].name}</h3><div class="note">Not possible: the pallet is too wide for two lanes in this container.</div></div>`;
+  const room = roomLeft(R, lay), r0 = room.perSize[0];
+  return `<div class="card opt ${active ? 'on' : ''}">
+    <div class="row"><h3 style="margin:0">Option ${fs.no} · ${esc(fs.name)}</h3><span class="spacer"></span>${active ? '<span class="badge ok">Used for pallet sheets</span>' : `<button class="btn small" data-act="usePattern" data-pat="${key}">Use this option</button>`}</div>
+    <div class="note" style="margin:4px 0 8px">${esc(fs.desc)}</div>
+    ${C0 ? containerSVG(C0, lay) : ''}
+    <div class="row" style="margin-top:8px"><span class="badge">${lay.per} floor spots per container</span><span class="badge ${lay.nC > 1 ? 'warn' : 'ok'}">${lay.nC} container${lay.nC > 1 ? 's' : ''}</span><span class="badge">${lay.units.length} of ${lay.nC * lay.per} spots used</span>
+    ${r0 && r0.pallets > 0 ? `<span class="badge">room for about ${r0.pallets} more pallet${r0.pallets > 1 ? 's' : ''} (${r0.boxes} boxes)</span>` : ''}</div></div>`;
+}
+function containerBlock(lay, key){
+  return lay.containers.map((C, ci) => {
+    const pct = Math.round(C.place.length / lay.per * 100), k3 = key + '-' + ci;
+    return `<div class="card cont"><div class="contHead"><h2 style="margin:0">Option ${lay.fs.no} · Container ${ci + 1} of ${lay.nC}</h2>
+      <span class="badge">${esc(R.cont.name)} · inside ${esc(fDims(R.cont.L, R.cont.W, R.cont.H))}</span><span class="badge">${C.place.length} of ${lay.per} floor spots (${pct}%)</span><span class="badge">${C.pallets} pallets · ${C.boxes} boxes</span><span class="badge ${C.weight > R.cont.payload ? 'err' : C.weight > US_ROAD_KG ? 'warn' : ''}">${esc(fW(C.weight))}</span>
+      <span class="spacer"></span><button class="btn small" data-act="show3dCont" data-k3="${k3}">${ui.cont3d === k3 ? 'Hide 3D' : 'Show 3D'}</button></div>
+      ${ui.cont3d === k3 ? `<div class="view3d" id="v3dCont" data-k3="${k3}" style="height:460px;margin-bottom:10px"><span class="hint">Drag to rotate · scroll to zoom · right-drag to move</span></div><div class="row" style="margin:-4px 0 10px"><button class="btn small" data-act="png">Save 3D image</button></div>` : ''}
+      ${containerSVG(C, lay)}
+      <div class="sides">${[...new Set(lay.fs.lanes.map(l => l.lane))].map(ln => `<div>${sideSVG(C, lay, ln)}</div>`).join('')}</div>
+      <h3 style="margin-top:12px">Loading order (front to doors, bottom pallet first)</h3>${loadListHTML(C)}</div>`;
+  }).join('');
+}
+function compareHTML(){
+  const rows = compareOptions(R);
+  const best = Math.min(...rows.map(r => r.nC));
+  return `<div class="card" style="margin-bottom:14px"><h3>Compare all containers and options</h3><div class="note" style="margin-bottom:6px">For this plan (${R.pallets.length} pallets). Click a row to use it.</div><div class="tblwrap" style="max-height:none"><table class="t"><thead><tr><th>Container</th><th>Option</th><th class="n">Floor spots</th><th class="n">Full pallets stack 2 high</th><th class="n">Max pallets per container</th><th class="n">Containers needed</th><th class="n">Last container full</th></tr></thead><tbody>
+  ${rows.map(r => { const on = r.k === S.sea.type && r.pat === R.layout.fs.pattern; return `<tr data-cmp="${r.k}|${r.pat}" style="cursor:pointer;${on ? 'background:#e9f1fd;font-weight:700' : ''}"><td>${esc(r.c.name)}</td><td>Option ${r.no} · ${esc(r.name)}</td><td class="n">${r.per}</td><td class="n">${r.two ? 'yes' : 'no'}</td><td class="n">${r.maxPallets}</td><td class="n">${r.nC === best ? '<span class="badge ok">' + r.nC + '</span>' : r.nC}</td><td class="n">${r.lastFill}%</td></tr>`; }).join('')}
+  </tbody></table></div></div>`;
+}
+function viewContainer(){
+  if (!R.pallets.length || !R.layouts) return msgsHTML() + `<div class="card empty">Nothing to load yet.</div>`;
+  let h = kpisHTML();
+  h += `<div class="optgrid">${optionCard('straight')}${optionCard('lanes')}</div>`;
+  h += `<div class="row" style="margin:4px 0 12px"><span class="lbl" style="margin:0">Show full plans</span><div class="seg" data-uiseg="showOpt" style="width:360px">${[['straight', 'Option 1'], ['lanes', 'Option 2'], ['both', 'Both']].map(([k, n]) => `<button data-v="${k}" class="${ui.showOpt === k ? 'on' : ''}">${n}</button>`).join('')}</div></div>`;
+  const show = ui.showOpt === 'both' ? ['straight', 'lanes'] : [ui.showOpt];
+  for (const k of show) { const lay = R.layouts[k]; if (!lay || lay.fs.fallback) continue; h += containerBlock(lay, k); }
+  h += compareHTML();
+  return h;
+}
+function after3DContainer(){
+  const el = $('#v3dCont'); if (!el || !ui.cont3d) return;
+  const [key, ci] = ui.cont3d.split('-'); const lay = R.layouts && R.layouts[key]; const C = lay && lay.containers[+ci];
+  if (C) mount3D(el, 'option' + lay.fs.no + '-container-' + (+ci + 1), build3DContainer(C, lay));
+}
+
+/* ---------------- Air view ---------------- */
+function viewAir(){
+  if (!R.pallets.length || !R.air) return msgsHTML() + `<div class="card empty">Nothing to plan yet.</div>`;
+  const A = R.air;
+  let h = kpisHTML() + msgsHTML();
+  h += `<div class="card"><h2>Air freight pallets</h2><div class="tblwrap" style="max-height:none"><table class="t"><thead><tr><th>Pallet</th><th>Shipment</th><th class="n">Boxes</th><th class="n">L x W x H (${Lu()})</th><th class="n">Gross (${Wu()})</th><th class="n">Volume wt (${Wu()})</th><th class="n">Chargeable (${Wu()})</th></tr></thead><tbody>
+  ${A.rows.map(r => `<tr><td><span class="pill" style="background:${shipColor(r.p.si)}">${esc(r.p.id)}</span></td><td class="mono">${esc(S.shipments[r.p.si].sid || '')}</td><td class="n">${r.p.count}</td>
+    <td class="n">${esc([R.P, R.Q, r.p.height].map(x => lenVal(x, 1)).join(' x '))}</td><td class="n">${wtVal(r.gross, 0)}</td><td class="n">${wtVal(r.vol, 0)}</td><td class="n"><b>${wtVal(r.charge, 0)}</b></td></tr>`).join('')}
+  <tr><td colspan="4"><b>Total</b></td><td class="n"><b>${wtVal(A.gross, 0)}</b></td><td class="n"><b>${wtVal(A.vol, 0)}</b></td><td class="n"><b>${wtVal(A.charge, 0)}</b></td></tr></tbody></table></div>
+  <div class="note" style="margin-top:8px">For comparison, the same boxes sent loose: gross ${esc(fW(A.loose.w))}, volume weight ${esc(fW(A.loose.v))}, chargeable ${esc(fW(Math.max(A.loose.w, A.loose.v)))}. Airlines and forwarders round and may add their own minimums.</div></div>`;
+  return h;
+}
+
+/* ---------------- Pallets view ---------------- */
+function viewPallets(){
+  if (!R.pallets.length) return `<div class="card empty">No pallets yet.</div>`;
+  let p = R.pallets.find(x => x.uid === ui.pallet) || R.pallets[0];
+  ui.pallet = p.uid;
+  const list = R.ships.map(shp => shp.pallets.length ? `<div class="lbl" style="margin-top:6px">Shipment ${shipCode(shp.si)}</div>` + shp.pallets.map(x => tileHTML(x, x === p)).join('') : '').join('');
+  const skuRows = new Map();
+  p.boxes.forEach(b => { const k = b.si + '|' + b.sku; if (!skuRows.has(k)) skuRows.set(k, { b, ns: [], units: 0 }); const r = skuRows.get(k); r.ns.push(b.n); r.units += b.upb; });
+  const where = S.mode === 'sea' ? (p.level === 'bottom' ? `Bottom of stack, ${esc(p.partner.id)} goes on top` : p.level === 'top' ? `Top of stack, goes on ${esc(p.partner.id)}` : 'Single (nothing on top)') : 'Air pallet (not stacked)';
+  const pos = S.mode === 'sea' && p.spot ? ` · Option ${R.layout.fs.no}: container ${p.cont + 1}, ${posText(p.spot)}, ${fL(p.spot.d, 0)} side across, load #${p.order}` : '';
+  const sh = S.shipments[p.si];
+  return `<div class="split"><div class="plist">${list}</div><div>
+    <div class="card" style="margin-bottom:12px"><div class="row"><div class="code" style="background:${shipColor(p.si)};width:auto;padding:0 12px;height:44px;font-size:24px">${esc(p.id)}</div>
+      <div><b>${esc(sh.name || '')}</b> <span class="mono muted">${esc(sh.sid || '')}</span><div class="muted">Pallet label ${p.n}/${p.labelOf} · ${where}${pos}</div></div><span class="spacer"></span>
+      <span class="badge">${p.count} boxes</span><span class="badge">${p.units.toLocaleString()} units</span><span class="badge">${p.layers.length} layers</span><span class="badge">${esc(fL(p.height))} high</span><span class="badge">${esc(fW(p.weight))}</span>
+      ${p.mixedShip ? '<span class="badge warn">2 shipments</span>' : ''}${!p.flat ? '<span class="badge warn">part-full top</span>' : ''}</div></div>
+    <div class="view3d" id="v3dPal"><span class="hint">Drag to rotate · scroll to zoom</span></div>
+    <div class="row" style="margin:8px 0 12px"><button class="btn small" data-act="png">Save 3D image</button><span class="note">Layer 1 is the bottom layer. Each square is one carton.</span></div>
+    <div class="layers">${p.layers.map((L, li) => `<div class="layer"><div class="lt"><span>Layer ${li + 1}${li === 0 ? ' (bottom)' : li === p.layers.length - 1 ? ' (top)' : ''}</span><span class="muted">${L.boxes.length}/${L.rects.length} · ${esc(fL(L.h))}</span></div>${layerSVG(p, li)}</div>`).join('')}</div>
+    <div class="card" style="margin-top:12px"><h3>Boxes on this pallet</h3><table class="t"><thead><tr><th>Shipment</th><th>SKU</th><th class="n">Boxes</th><th>Box numbers</th><th class="n">Units</th><th class="n">Box size</th></tr></thead><tbody>
+      ${[...skuRows.values()].map(r => `<tr><td><span class="pill" style="background:${shipColor(r.b.si)}">${shipCode(r.b.si)}</span></td><td class="mono">${esc(r.b.sku)}</td><td class="n">${r.ns.length}</td><td>${esc(runs(r.ns))}</td><td class="n">${r.units}</td><td class="n">${esc(fDims(r.b.L, r.b.W, r.b.H))}</td></tr>`).join('')}
+    </tbody></table></div></div></div>`;
+}
+function after3DPallet(){ const el = $('#v3dPal'); const p = R.pallets.find(x => x.uid === ui.pallet); if (el && p) mount3D(el, 'pallet-' + p.id, build3DPallet(p)); }
+
+/* ---------------- print ---------------- */
+function printDoc(){
+  if (!R.pallets.length) { toast('Nothing to print yet'); return; }
+  const foot = n => `<div class="pfoot"><span>HexaEcom Pallet & Container Planner · ${esc(S.name || '')} · ${esc(R.ships.map(s => `${shipCode(s.si)}: ${s.sh.sid || s.sh.name || ''}`).join(' · '))}</span><span>${n}</span></div>`;
+  let pg = 0; let h = '';
+  // page 1 summary
+  pg++;
+  h += `<div class="pp"><h1>${esc(S.name || 'Pallet plan')}</h1><div class="muted" style="margin-bottom:8px">${S.mode === 'sea' ? 'Sea freight' : 'Air freight'} · pallet ${esc(fDims(S.pallet.L, S.pallet.W, S.pallet.H))} · ${S.mode === 'sea' ? esc(R.cont.name) : esc(AIRCRAFT[S.air.craft]?.name || '')}</div>${kpisHTML()}${msgsHTML()}
+    ${R.ships.map(shp => sizeTableHTML(shp)).join('')}${foot('Page ' + pg)}</div>`;
+  if (S.mode === 'sea' && R.layouts) {
+    pg++;
+    h += `<div class="pp"><h1>Loading options · ${esc(R.cont.name)}</h1>${['straight', 'lanes'].map(k => { const L = R.layouts[k]; if (!L || L.fs.fallback || !L.containers[0]) return ''; return `<div style="margin-bottom:6px"><b>Option ${L.fs.no} · ${esc(L.fs.name)}</b>${R.layout === L ? ' (used for these pallet sheets)' : ''} · ${L.per} floor spots · ${L.nC} container${L.nC > 1 ? 's' : ''}<div class="note">${esc(L.fs.desc)}</div><div style="width:86%;margin:0 auto">${containerSVG(L.containers[0], L)}</div></div>`; }).join('')}${foot('Page ' + pg)}</div>`;
+    R.layout.containers.forEach((C, ci) => { pg++; h += `<div class="pp"><h1>Option ${R.layout.fs.no} · Container ${ci + 1} of ${R.layout.nC} · ${esc(R.cont.name)}</h1><div style="width:86%;margin:0 auto">${containerSVG(C, R.layout)}</div><div style="margin-top:4px">${loadListHTML(C)}</div>${foot('Page ' + pg)}</div>`; });
+  }
+  for (const p of R.pallets) {
+    pg++;
+    const n = p.layers.length, cols = n <= 3 ? 3 : n <= 4 ? 4 : Math.ceil(n / 2);
+    const where = S.mode === 'sea' ? (p.level === 'bottom' ? `BOTTOM pallet · ${esc(p.partner.id)} goes on top` : p.level === 'top' ? `TOP pallet · goes on ${esc(p.partner.id)}` : 'SINGLE pallet') : 'Air pallet';
+    const counts = {}; p.boxes.forEach(b => { const k = fDimsCm(b.L, b.W, b.H); counts[k] = (counts[k] || 0) + 1; });
+    h += `<div class="pp"><div class="row" style="gap:12px;margin-bottom:6px"><div class="code" style="background:${shipColor(p.si)};width:auto;padding:0 14px;height:52px;font-size:34px">${esc(p.id)}</div>
+      <div><div style="font-size:15px;font-weight:800">${where}</div><div>${p.count} boxes · ${esc(fL(p.height, 0))} high · ${esc(fW(p.weight))} · label ${p.n}/${p.labelOf} · ${esc(S.shipments[p.si].sid || '')}${S.mode === 'sea' && p.spot ? ` · container ${p.cont + 1}, ${posText(p.spot)} (${fL(p.spot.d, 0)} side across), load #${p.order}` : ''}</div>
+      <div><b>Box size:</b> ${Object.entries(counts).map(([k, c]) => `${c} boxes of ${k}`).join(' + ')}</div></div></div>
+      <div style="display:grid;grid-template-columns:repeat(${cols},1fr);gap:8px">${p.layers.map((L, li) => `<div><div style="font-weight:700;font-size:12px">Layer ${li + 1}${li === 0 ? ' (bottom)' : li === n - 1 ? ' (top)' : ''}</div>${layerSVG(p, li)}</div>`).join('')}</div>${foot('Page ' + pg)}</div>`;
+  }
+  $('#print').innerHTML = h;
+  setTimeout(() => window.print(), 50);
+}
+
+/* ---------------- export ---------------- */
+function exportExcel(){
+  if (!R.pallets.length) { toast('Nothing to export yet'); return; }
+  const pal = [['Pallet', 'Shipment', 'Amazon shipment ID', 'Pallet label', 'Role', 'Stack partner', 'Boxes', 'Units', 'Layers', `Height (${Lu()})`, `Weight (${Wu()})`, 'Box sizes', 'Container', 'Lane', 'Spot', 'Load #', 'Box numbers']];
+  for (const p of R.pallets) {
+    const byShip = {}; p.boxes.forEach(b => (byShip[shipCode(b.si)] = byShip[shipCode(b.si)] || []).push(b.n));
+    pal.push([p.id, shipCode(p.si), S.shipments[p.si].sid || '', `${p.n}/${p.labelOf}`, p.level || '', p.partner ? p.partner.id : '', p.count, p.units, p.layers.length, +lenVal(p.height, 1), +wtVal(p.weight, 1),
+      [...new Set(p.boxes.map(b => fDimsCm(b.L, b.W, b.H)))].join(' + '), p.cont != null ? p.cont + 1 : '', p.spot ? p.spot.lane : '', p.spot ? p.spot.pos : '', p.order || '',
+      Object.entries(byShip).map(([k, ns]) => (Object.keys(byShip).length > 1 ? k + ': ' : '') + runs(ns)).join(' | ')]);
+  }
+  const box = [['Shipment', 'Amazon shipment ID', 'Box #', 'Box label', 'SKU', 'Units', `L (${Lu()})`, `W (${Lu()})`, `H (${Lu()})`, `Weight (${Wu()})`, 'Pallet', 'Layer']];
+  for (const p of R.pallets) p.layers.forEach((L, li) => L.boxes.forEach(b => box.push([shipCode(b.si), S.shipments[b.si].sid || '', b.n, `Box ${b.n} of ${R.ships[b.si].N}`, b.sku, b.upb, +lenVal(b.L), +lenVal(b.W), +lenVal(b.H), +wtVal(b.wt, 2), p.id, li + 1])));
+  box.splice(1, box.length - 1, ...box.slice(1).sort((a, b) => byAscii(a[0], b[0]) || a[2] - b[2]));
+  const fname = (S.name || 'pallet-plan').replace(/[^\w\- ]+/g, '').trim().replace(/\s+/g, '_');
+  if (window.XLSX) {
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(pal), 'Pallets');
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(box), 'Boxes');
+    if (S.mode === 'sea') {
+      const ld = [['Load #', 'Container', 'Pallet', 'Lane', 'Spot', 'Level', `Height (${Lu()})`, `Weight (${Wu()})`]];
+      R.pallets.slice().sort((a, b) => a.order - b.order).forEach(p => ld.push([p.order, p.cont + 1, p.id, p.spot.lane, p.spot.pos, p.level, +lenVal(p.height, 1), +wtVal(p.weight, 1)]));
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(ld), 'Loading plan');
+      const cmp = [['Container', 'Option', 'Floor spots', 'Stacks 2 high', 'Max pallets per container', 'Containers needed', 'Last container full %']];
+      compareOptions(R).forEach(r => cmp.push([r.c.name, 'Option ' + r.no + ' ' + r.name, r.per, r.two ? 'yes' : 'no', r.maxPallets, r.nC, r.lastFill]));
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(cmp), 'Loading options');
+    }
+    XLSX.writeFile(wb, fname + '.xlsx');
+  } else {
+    const csv = box.map(r => r.map(c => /[",\n]/.test(String(c)) ? `"${String(c).replace(/"/g, '""')}"` : c).join(',')).join('\n');
+    download(new Blob([csv], { type: 'text/csv' }), fname + '_boxes.csv');
+  }
+}
+function download(blob, name){ const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000); }
+
+/* ---------------- import ---------------- */
+function parseRows(rows){
+  let hi = -1;
+  for (let i = 0; i < Math.min(rows.length, 40); i++) if ((rows[i] || []).some(c => /^\s*(merchant\s*sku|sku|seller\s*sku)\s*$/i.test(String(c ?? '')))) { hi = i; break; }
+  if (hi < 0) return null;
+  const head = rows[hi].map(c => String(c ?? ''));
+  const find = re => head.findIndex(h => re.test(h));
+  const col = { sku: find(/^\s*(merchant\s*sku|sku|seller\s*sku)\s*$/i), qty: find(/^\s*(quantity|total units|units)\s*$/i), upb: find(/units?\s*(per|\/)\s*box|per\s*box/i), boxes: find(/number of boxes|^\s*boxes\s*$|box count|cartons/i), L: find(/length/i), W: find(/width/i), H: find(/height/i), wt: find(/weight/i) };
+  if (col.boxes < 0 || col.L < 0 || col.W < 0 || col.H < 0) return null;
+  const lenCm = /\(\s*cm\s*\)/i.test(head[col.L]), wKg = col.wt >= 0 && /\(\s*kg\s*\)/i.test(head[col.wt]);
+  const num = v => { const n = parseFloat(String(v ?? '').replace(/,/g, '')); return isFinite(n) ? n : 0; };
+  const lines = [];
+  for (let i = hi + 1; i < rows.length; i++) {
+    const r = rows[i] || []; const sku = String(r[col.sku] ?? '').trim();
+    if (!sku) continue;
+    const boxes = Math.round(num(r[col.boxes])); if (boxes <= 0) continue;
+    let upb = col.upb >= 0 ? num(r[col.upb]) : 0; if (!upb && col.qty >= 0) upb = num(r[col.qty]) / boxes;
+    const k = lenCm ? 1 : IN, kw = wKg ? 1 : LB;
+    const L = num(r[col.L]) * k, W = num(r[col.W]) * k, H = num(r[col.H]) * k;
+    if (!(L > 0 && W > 0 && H > 0)) continue;
+    lines.push({ sku, upb: Math.round(upb * 100) / 100, boxes, L, W, H, wt: col.wt >= 0 ? num(r[col.wt]) * kw : 0 });
+  }
+  return lines;
+}
+function importFile(file, targetSi){
+  if (!window.XLSX) { toast('Excel import needs an internet connection to load the reader'); return; }
+  const fr = new FileReader();
+  fr.onload = e => {
+    try {
+      const wb = XLSX.read(new Uint8Array(e.target.result), { type: 'array' });
+      const names = wb.SheetNames.slice().sort((a, b) => (/template/i.test(b) ? 1 : 0) - (/template/i.test(a) ? 1 : 0)).filter(n => !/example|definition|instruction/i.test(n));
+      let lines = null;
+      for (const n of names) { lines = parseRows(XLSX.utils.sheet_to_json(wb.Sheets[n], { header: 1, raw: true, defval: '' })); if (lines && lines.length) break; }
+      if (!lines || !lines.length) { toast('No box lines found. Needs columns like Merchant SKU, Number of boxes, Box length/width/height.'); return; }
+      const base = file.name.replace(/\.[^.]+$/, '');
+      const sid = (base.match(/(STAR|FBA)[-_A-Z0-9]{6,}/i) || [''])[0];
+      if (targetSi != null && S.shipments[targetSi]) { S.shipments[targetSi].lines = lines; toast(`Replaced ${lines.length} lines`); }
+      else { S.shipments.push({ uid: uid(), name: base.slice(0, 60), sid, labels: '', lines }); toast(`Imported ${lines.length} lines, ${lines.reduce((a, l) => a + l.boxes, 0)} boxes`); }
+      changed(true);
+    } catch (err) { console.error(err); toast('Could not read that file'); }
+  };
+  fr.readAsArrayBuffer(file);
+}
+
+/* ---------------- persistence ---------------- */
+const LS_KEY = 'pallet-planner-v1';
+function saveLocal(){ try { localStorage.setItem(LS_KEY, JSON.stringify(S)); } catch (e) {} }
+function loadLocal(){ try { const s = localStorage.getItem(LS_KEY); if (s) return normalize(JSON.parse(s)); } catch (e) {} return null; }
+function normalize(o){
+  const d = defaultState();
+  const out = { ...d, ...o, pallet: { ...d.pallet, ...(o.pallet || {}) }, rules: { ...d.rules, ...(o.rules || {}) }, sea: { ...d.sea, ...(o.sea || {}) }, air: { ...d.air, ...(o.air || {}) } };
+  out.shipments = (o.shipments || []).map(s => ({ uid: s.uid || uid(), name: s.name || '', sid: s.sid || '', labels: s.labels ?? '', lines: (s.lines || []).map(l => ({ sku: l.sku || '', upb: +l.upb || 0, boxes: +l.boxes || 0, L: +l.L || 0, W: +l.W || 0, H: +l.H || 0, wt: +l.wt || 0 })) }));
+  if (!CONTAINERS[out.sea.type]) out.sea.type = '40HC';
+  if (!PATTERNS[out.sea.pattern]) out.sea.pattern = 'lanes';
+  if (!PALLETS[out.pallet.preset]) out.pallet.preset = 'CUSTOM';
+  return out;
+}
+function loadExample(){
+  S = defaultState();
+  S.name = 'Demo project';
+  S.shipments = EXAMPLE.map(e => ({ uid: uid(), name: e.name, sid: e.shipmentId, labels: e.labelPallets, lines: e.lines.map(l => ({ sku: l[0], upb: l[1], boxes: l[2], L: l[3] * IN, W: l[4] * IN, H: l[5] * IN, wt: l[6] * LB })) }));
+  ui.tab = 'plan'; ui.pallet = null; ui.cont3d = null;
+  changed(true);
+}
+
+/* ---------------- events ---------------- */
+let saveT = null;
+function changed(full){
+  R = compute();
+  if (full !== false) renderSide();
+  render();
+  clearTimeout(saveT); saveT = setTimeout(saveLocal, 300);
+}
+document.addEventListener('click', e => {
+  const cmp = e.target.closest('[data-cmp]');
+  if (cmp) { const [k, pat] = cmp.dataset.cmp.split('|'); S.sea.type = k; S.sea.pattern = pat; ui.cont3d = null; changed(true); toast('Now using ' + CONTAINERS[k].name + ', Option ' + PATTERNS[pat].no); return; }
+  const t = e.target.closest('button, [data-pallet]'); if (!t) return;
+  if (t.dataset.tab) { ui.tab = t.dataset.tab; render(); return; }
+  if (t.dataset.pallet) { ui.pallet = t.dataset.pallet; ui.tab = 'pallets'; render(); window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
+  const useg = t.closest('[data-uiseg]');
+  if (useg && t.dataset.v) { ui[useg.dataset.uiseg] = t.dataset.v; ui.cont3d = null; render(); return; }
+  const seg = t.closest('[data-seg]');
+  if (seg && t.dataset.v) { S[seg.dataset.seg] = t.dataset.v; changed(true); return; }
+  const act = t.dataset.act; if (!act) return;
+  const si = t.dataset.si != null ? +t.dataset.si : null;
+  switch (act) {
+    case 'example': loadExample(); break;
+    case 'new': if (confirm('Start a new empty project? Save the current one first if you need it.')) { S = defaultState(); ui.tab = 'shipments'; ui.pallet = null; ui.cont3d = null; changed(true); } break;
+    case 'open': $('#fileProject').click(); break;
+    case 'save': download(new Blob([JSON.stringify(S, null, 1)], { type: 'application/json' }), (S.name || 'pallet-plan').replace(/[^\w\- ]+/g, '').trim().replace(/\s+/g, '_') + '.json'); break;
+    case 'excel': exportExcel(); break;
+    case 'print': printDoc(); break;
+    case 'png': export3D(); break;
+    case 'addShip': S.shipments.push({ uid: uid(), name: 'Shipment ' + shipCode(S.shipments.length), sid: '', labels: '', lines: [{ sku: 'SKU-1', upb: 1, boxes: 1, L: 50, W: 40, H: 30, wt: 10 }] }); changed(true); break;
+    case 'importNew': ui.importTarget = null; $('#fileImport').click(); break;
+    case 'importInto': ui.importTarget = si; $('#fileImport').click(); break;
+    case 'delShip': if (confirm('Delete this shipment?')) { S.shipments.splice(si, 1); changed(true); } break;
+    case 'addLine': { const ls = S.shipments[si].lines; const last = ls[ls.length - 1] || { L: 50, W: 40, H: 30, wt: 10, upb: 1 }; ls.push({ sku: '', upb: last.upb, boxes: 1, L: last.L, W: last.W, H: last.H, wt: last.wt }); changed(false); break; }
+    case 'delLine': S.shipments[si].lines.splice(+t.dataset.li, 1); changed(false); break;
+    case 'show3dCont': { const k3 = t.dataset.k3; ui.cont3d = ui.cont3d === k3 ? null : k3; T.key = null; render(); break; }
+    case 'usePattern': S.sea.pattern = t.dataset.pat; changed(true); break;
+  }
+});
+document.addEventListener('change', e => {
+  const el = e.target;
+  if (el.id === 'fileProject') { const f = el.files[0]; el.value = ''; if (!f) return; const fr = new FileReader(); fr.onload = ev => { try { S = normalize(JSON.parse(ev.target.result)); ui.pallet = null; ui.cont3d = null; ui.tab = 'plan'; changed(true); toast('Project opened'); } catch (err) { toast('That is not a planner project file'); } }; fr.readAsText(f); return; }
+  if (el.id === 'fileImport') { const f = el.files[0]; el.value = ''; if (f) importFile(f, ui.importTarget); return; }
+  if (el.id === 'projName') { S.name = el.value; saveLocal(); return; }
+  if (el.dataset.k) {
+    const k = el.dataset.k, t = el.dataset.t;
+    let v;
+    if (t === 'bool') v = el.checked;
+    else if (t === 'len') v = toCm(parseFloat(el.value) || 0);
+    else if (t === 'wt') v = toKg(parseFloat(el.value) || 0);
+    else if (t === 'num') v = parseFloat(el.value) || 0;
+    else v = el.value;
+    if (t === 'preset') { S.pallet.preset = v; if (PALLETS[v].L) { S.pallet.L = PALLETS[v].L; S.pallet.W = PALLETS[v].W; } changed(true); return; }
+    if (t === 'craft') { S.air.craft = v; if (AIRCRAFT[v].H) S.air.H = AIRCRAFT[v].H; changed(true); return; }
+    setPath(S, k, v);
+    changed(true); return;
+  }
+  if (el.dataset.sh != null) {
+    const sh = S.shipments[+el.dataset.sh], f = el.dataset.f;
+    if (el.dataset.li != null) {
+      const l = sh.lines[+el.dataset.li];
+      if (f === 'sku') l.sku = el.value.trim();
+      else if (['L', 'W', 'H'].includes(f)) l[f] = toCm(parseFloat(el.value) || 0);
+      else if (f === 'wt') l.wt = toKg(parseFloat(el.value) || 0);
+      else l[f] = parseFloat(el.value) || 0;
+    } else sh[f] = f === 'labels' ? (el.value === '' ? '' : Math.max(0, Math.round(+el.value))) : el.value;
+    changed(false);
+  }
+});
+
+/* ---------------- boot ---------------- */
+(function boot(){
+  const saved = loadLocal();
+  if (saved && saved.shipments && saved.shipments.length) { S = saved; ui.tab = 'plan'; }
+  else if (EXAMPLE.length) { loadExample(); return; }
+  changed(true);
+})();
+</script>
+</body>
+</html>
