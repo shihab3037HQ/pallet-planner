@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Guide · Pallet & Container Planner | HexaEcom</title>
 <meta name="description" content="How to use the HexaEcom Pallet & Container Planner: import format, pallet rules, sea containers, floor-loaded cartons, air ULDs and contours, chargeable weight, printing and sharing.">
-<meta name="author" content="Gaziur Rahman Shihab, HexaEcom">
+<meta name="author" content="HexaEcom">
 <link rel="canonical" href="https://pallet.hexaecom.com/guide/">
 <meta property="og:title" content="Planner guide | HexaEcom">
 <meta property="og:description" content="Import format, pallet rules, containers, ULD contours and chargeable weight explained.">
@@ -14,6 +14,7 @@
 <meta name="theme-color" content="#111418">
 <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
 <script>try{var t=localStorage.getItem('pp-theme');if(t&&t!=='auto')document.documentElement.dataset.theme=t}catch(e){}</script>
+<script src="../assets/js/analytics.js"></script>
 <link rel="stylesheet" href="../assets/css/base.css">
 <link rel="stylesheet" href="../assets/css/site.css">
 </head>
@@ -22,12 +23,12 @@
 <header class="top site">
   <div class="in">
     <a class="brand" href="../" aria-label="Pallet Planner by HexaEcom, home">
-      <img src="../assets/img/logo-mark-white.svg" alt="" width="30" height="37">
+      <img src="../assets/img/logo-mark.svg" alt="" width="30" height="37" class="mark-ink">
       <div><b>Pallet Planner <span class="by">by HexaEcom</span></b><small>Sea containers and air ULDs</small></div>
     </a>
     <span class="spacer"></span>
-    <nav class="nav" aria-label="Site"><a href="../">Home</a><a href="./" aria-current="page">Guide</a><a href="../v1/">Version 1</a></nav>
-    <a class="btn primary" href="../app/">Open planner</a>
+    <nav class="nav" aria-label="Site"><a href="../">Home</a><a href="./" aria-current="page">Guide</a></nav>
+    <button class="btn themebtn" data-act="theme" aria-label="Switch light or dark theme"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor"/></svg><span class="tl">Auto</span></button><a class="btn primary" href="../app/">Open planner</a>
   </div>
 </header>
 
@@ -52,7 +53,7 @@
     <p>The planner reads the same Excel or CSV file you upload to Seller Central. It looks for a header row with these columns (names can vary a little):</p>
     <div class="tblx"><table>
       <tr><th>Column</th><th>Used for</th></tr>
-      <tr><td><code>Merchant SKU</code> (or <code>SKU</code>)</td><td>Box labels, colours and sizes read from the SKU (for example <code>TEE_Black_M</code>)</td></tr>
+      <tr><td><code>Merchant SKU</code> (or <code>SKU</code>)</td><td>Box labels. If a SKU contains a colour word (for example <code>-Black</code>), its boxes are drawn in that colour</td></tr>
       <tr><td><code>Units per box</code> (or <code>Quantity</code>)</td><td>Units on each pallet</td></tr>
       <tr><td><code>Number of boxes</code></td><td>How many cartons of this line</td></tr>
       <tr><td><code>Box length / width / height</code></td><td>Carton size. Headings with <code>(cm)</code> are read as centimetres, otherwise inches</td></tr>
@@ -117,19 +118,21 @@
     <ul>
       <li><b>Print / PDF:</b> a summary page, the loading options, one page per container or ULD (with a 3D picture when the <b>3D</b> box is ticked), and one sheet per pallet with every layer and box number. Choose "Save as PDF" in the print dialog.</li>
       <li><b>Excel:</b> pallets, boxes, loading plan, loading options and ULD sheets.</li>
-      <li><b>Save / Open:</b> a project file (.json) you can keep or email. Version 1 project files open too.</li>
+      <li><b>Save / Open:</b> a project file (.json) you can keep or email.</li>
       <li><b>Share link:</b> the whole plan, compressed into the link. Anyone with the link sees the plan, including SKUs and shipment IDs.</li>
     </ul>
 
     <h2 id="privacy">Your data</h2>
     <p>The planner runs entirely in your browser. Shipments are saved in your browser's storage on this device, never on a server. A share link keeps the plan after the <code>#</code> in the link, a part browsers do not send to the server. The page loads two free libraries from public CDNs: three.js for 3D and SheetJS for Excel. Everything else works offline once the page is open.</p>
+    <p>To see how many people use the planner, the site counts visits with Google Analytics: pages viewed and which features are used (for example "print" or "import"). Shipment data, SKUs and file contents are never sent.</p>
+    <p><button class="btn" data-act="stats-optout">Turn off visit counting in this browser</button> <span class="note" id="statsState"></span></p>
 
     <h2 id="limits">Limits</h2>
     <ul>
       <li>Container sizes, payloads, door heights, ULD contours and maximum weights are typical values.</li>
       <li>Floor-loaded walls hold one box size of one shipment each; mixed walls are not planned.</li>
       <li>Air pallets are not stacked. Loose cartons on a ULD are shown as a chargeable-weight comparison only.</li>
-      <li>If anything looks wrong, <a href="../v1/">version 1</a> is still available unchanged.</li>
+      <li>If anything looks wrong,  is still available unchanged.</li>
     </ul>
     <p style="margin-top:30px"><a class="btn primary big" href="../app/">Open the planner</a></p>
   </article>
@@ -137,9 +140,10 @@
 
 <footer class="site-foot">
   <div class="in">
-    <div class="credit"><img src="../assets/img/logo-mark.svg" alt="" width="22" height="27" class="mark-ink"><span>Built by <b>Gaziur Rahman Shihab</b> · <b>HexaEcom</b></span></div>
-    <nav aria-label="Footer"><a href="../app/">Planner</a><a href="./">Guide</a><a href="../v1/">Version 1</a><a href="https://hexaecom.com">hexaecom.com</a></nav>
+    <div class="credit"><img src="../assets/img/logo-mark.svg" alt="" width="22" height="27" class="mark-ink"><span>Built by the <b>HexaEcom</b> team</span></div>
+    <nav aria-label="Footer"><a href="../app/">Planner</a><a href="./">Guide</a><a href="./#privacy">Privacy</a><a href="https://hexaecom.com">hexaecom.com</a></nav>
   </div>
 </footer>
+<script src="../assets/js/site.js" defer></script>
 </body>
 </html>

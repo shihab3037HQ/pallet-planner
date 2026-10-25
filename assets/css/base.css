@@ -6,7 +6,8 @@
   --ok-bg:#e8f6ee; --warn-bg:#fff4e0; --err-bg:#fdecec; --info-bg:#e9f1fd;
   --ok-ink:#135f34; --warn-ink:#7a4a00; --err-ink:#8d1a20; --info-ink:#153f86;
   --hl-bg:#fff8e6; --hl-line:#f1d58f;
-  --head:#111418; --head-ink:#ffffff; --head-muted:#a6b0bf; --head-btn:#1d222a; --head-line:#2e3642;
+  --head:#ffffff; --head-ink:#111418; --head-muted:#5d6878; --head-btn:#f2f4f7; --head-line:#dde2e9;
+  --hero:#eef2f8; --hero-ink:#111418; --hero-muted:#4a5565; --hero-eyebrow:#2b59c3; --hero-shadow:0 -10px 40px rgba(16,24,40,.12);
   --view3d:#eef2f7; --floor3d:#dfe5ec; --cfloor3d:#d9dee5; --shadow:0 1px 2px rgba(16,24,40,.06),0 1px 3px rgba(16,24,40,.08);
   --radius:10px;
   color-scheme:light;
@@ -19,7 +20,8 @@
     --ok-ink:#7fd6a2; --warn-ink:#f3c26b; --err-ink:#ff9a9f; --info-ink:#9bbcff;
     --ok:#4cc27e; --warn:#e2a23a; --err:#ff6b70; --info:#7ea3ff;
     --hl-bg:#2a2414; --hl-line:#5a4a1f;
-    --head:#0a0c0f; --head-btn:#181d24; --head-line:#262d37;
+    --head:#0a0c0f; --head-ink:#ffffff; --head-muted:#a6b0bf; --head-btn:#181d24; --head-line:#262d37;
+    --hero:#0a0c0f; --hero-ink:#ffffff; --hero-muted:#c4ccd8; --hero-eyebrow:#9bb7ff; --hero-shadow:0 -10px 60px rgba(0,0,0,.45);
     --view3d:#1a2029; --floor3d:#28303b; --cfloor3d:#6b7581; --shadow:none;
     color-scheme:dark;
   }
@@ -31,7 +33,8 @@
   --ok-ink:#7fd6a2; --warn-ink:#f3c26b; --err-ink:#ff9a9f; --info-ink:#9bbcff;
   --ok:#4cc27e; --warn:#e2a23a; --err:#ff6b70; --info:#7ea3ff;
   --hl-bg:#2a2414; --hl-line:#5a4a1f;
-  --head:#0a0c0f; --head-btn:#181d24; --head-line:#262d37;
+  --head:#0a0c0f; --head-ink:#ffffff; --head-muted:#a6b0bf; --head-btn:#181d24; --head-line:#262d37;
+    --hero:#0a0c0f; --hero-ink:#ffffff; --hero-muted:#c4ccd8; --hero-eyebrow:#9bb7ff; --hero-shadow:0 -10px 60px rgba(0,0,0,.45);
   --view3d:#1a2029; --floor3d:#28303b; --cfloor3d:#6b7581; --shadow:none;
   color-scheme:dark;
 }
@@ -62,10 +65,10 @@ img,svg{max-width:100%}
 /* buttons */
 .btn{border:1px solid var(--line);background:var(--panel);border-radius:8px;padding:6px 11px;display:inline-flex;align-items:center;gap:6px;font-weight:600;font-size:13px;text-decoration:none;color:var(--ink);white-space:nowrap}
 .btn:hover{border-color:var(--faint)}
-.top .btn{background:var(--head-btn);border-color:var(--head-line);color:#e8eef6}
-.top .btn:hover{border-color:#4a5566}
+.top .btn{background:var(--head-btn);border-color:var(--head-line);color:var(--head-ink)}
+.top .btn:hover{border-color:var(--faint)}
 .btn.primary{background:var(--brand);border-color:var(--brand);color:var(--brand-ink)}
-.top .btn.primary{background:#ffffff;border-color:#ffffff;color:#111418}
+.top .btn.primary{background:var(--head-ink);border-color:var(--head-ink);color:var(--head)}
 .btn.small{padding:3px 8px;font-size:12px}
 .btn.big{padding:11px 18px;font-size:15px;border-radius:10px}
 .btn.danger{color:var(--err)}
@@ -101,3 +104,6 @@ dialog h2{margin:0 0 6px;font-size:18px}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .mark-ink{filter:invert(1)}}
 .btn[data-act="theme"][data-mode="light"] svg path{fill:none}
 .btn[data-act="theme"][data-mode="dark"] svg circle{fill:currentColor}
+.themebtn{gap:6px}
+.themebtn .tl{font-size:12.5px}
+@media (max-width:520px){.themebtn .tl{display:none}}

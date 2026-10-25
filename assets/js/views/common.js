@@ -59,7 +59,7 @@ function kpisHTML(){
 // 3D viewport with camera presets, step-by-step loading and a details panel for clicked items
 function view3dHTML(id, o = {}){
   const views = [['iso', '3D'], ['top', 'Top'], ['side', 'Side'], ...(o.doors ? [['doors', 'Doors']] : [])];
-  return `<div class="view3d ${o.tall ? 'tall' : ''}" id="${id}"><div class="pick" hidden></div><span class="hint">Drag to rotate · scroll or pinch to zoom · tap ${o.what || 'a pallet'} for details</span></div>
+  return `<div class="view3d ${o.tall ? 'tall' : ''}" id="${id}"><div class="pick" hidden></div><div class="wm" aria-hidden="true"><img src="../assets/img/logo-mark.svg" alt="" class="mark-ink"><span>HexaEcom</span></div><span class="hint">Drag to rotate · scroll or pinch to zoom · tap ${o.what || 'a pallet'} for details</span></div>
   <div class="tools3d">
     <div class="seg seg-sm" role="group" aria-label="Camera">${views.map(([k, n]) => `<button data-view3d="${k}" class="${k === 'iso' ? 'on' : ''}">${n}</button>`).join('')}</div>
     ${o.steps ? `<button class="btn small" data-act="play3d">▶ ${o.stepLabel || 'Play loading'}</button><input type="range" id="step3d" min="0" max="1" value="1" aria-label="Loading step"><span class="note" id="step3dLbl"></span>` : ''}

@@ -38,6 +38,7 @@ function importFile(file, targetSi){
       if (targetSi != null && S.shipments[targetSi]) { S.shipments[targetSi].lines = lines; toast(`Replaced ${lines.length} lines`); }
       else { S.shipments.push({ uid: uid(), name: base.slice(0, 60), sid, labels: '', lines }); toast(`Imported ${lines.length} lines, ${lines.reduce((a, l) => a + l.boxes, 0)} boxes`); }
       changed(true);
+      track('import_file', { lines: lines.length });
     } catch (err) { console.error(err); toast('Could not read that file'); }
   };
   fr.readAsArrayBuffer(file);

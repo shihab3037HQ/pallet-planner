@@ -94,10 +94,38 @@ function pick3D(e){
   if (box) { box.innerHTML = o.userData.info(); box.hidden = false; }
 }
 function col3(f){ const c = new THREE.Color(); try { c.setStyle(f.fill); } catch (e) { c.set(0xcccccc); } return c; }
+// HexaEcom mark drawn onto saved and printed 3D pictures
+const BRAND = { dark: new Image(), light: new Image() };
+BRAND.dark.src = '../assets/img/logo-mark.svg'; BRAND.light.src = '../assets/img/logo-mark-white.svg';
+function brandedPNG(){
+  const src = T.r.domElement, w = src.width, h = src.height;
+  const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+  const g = cv.getContext('2d');
+  g.drawImage(src, 0, 0);
+  const bg = T.scene.background, darkBg = bg && (bg.r + bg.g + bg.b) / 3 < .35;
+  const mk = Math.max(22, Math.round(h * .055)), pad = Math.round(mk * .55), fs = Math.round(mk * .42);
+  const ink = darkBg ? '#ffffff' : '#111418';
+  g.globalAlpha = .72;
+  g.font = `800 ${fs}px -apple-system, "Segoe UI", Roboto, Arial, sans-serif`;
+  const t1 = 'HexaEcom', t2 = 'pallet.hexaecom.com';
+  g.font = `400 ${Math.round(fs * .78)}px -apple-system, "Segoe UI", Roboto, Arial, sans-serif`;
+  const w2 = g.measureText(t2).width;
+  g.font = `800 ${fs}px -apple-system, "Segoe UI", Roboto, Arial, sans-serif`;
+  const tw = Math.max(g.measureText(t1).width, w2), x = w - pad - tw, y = h - pad;
+  const logo = darkBg ? BRAND.light : BRAND.dark;
+  if (logo.complete && logo.naturalWidth) g.drawImage(logo, x - mk * .9, y - mk, mk * 220 / 270, mk);
+  g.fillStyle = ink; g.textBaseline = 'alphabetic';
+  g.fillText(t1, x, y - fs * .95);
+  g.font = `400 ${Math.round(fs * .78)}px -apple-system, "Segoe UI", Roboto, Arial, sans-serif`;
+  g.fillText(t2, x, y);
+  g.globalAlpha = 1;
+  return cv.toDataURL('image/png');
+}
 function export3D(){
   if (!T.r || !T.mount || !T.mount.isConnected) { toast('Open a 3D view first'); return; }
   T.r.render(T.scene, T.cam);
-  const a = document.createElement('a'); a.download = (T.key || 'view') + '.png'; a.href = T.r.domElement.toDataURL('image/png'); a.click();
+  const a = document.createElement('a'); a.download = 'HexaEcom-' + (T.key || 'view') + '.png'; a.href = brandedPNG(); a.click();
+  track('save_3d_image');
 }
 // render a build function off-screen to a PNG data URL (used for the printed loading plan)
 function snapshot3D(build, w = 1400, h = 620){
@@ -110,7 +138,7 @@ function snapshot3D(build, w = 1400, h = 620){
   T.r.setSize(w, h, false); T.cam.aspect = w / h; T.cam.updateProjectionMatrix();
   T.bounds = b; setView('iso');
   T.r.render(T.scene, T.cam);
-  const url = cv.toDataURL('image/png');
+  const url = brandedPNG();
   clear3D(); T.scene.background = keepBg; T.key = null;
   T.r.setSize(keepSize.x || 1, keepSize.y || 1, false);
   T.mount = keepMount;

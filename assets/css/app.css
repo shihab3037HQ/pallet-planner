@@ -1,5 +1,5 @@
 /* Planner app (layout and components ported from v1, colours moved to theme tokens) */
-.proj{flex:1;min-width:160px;max-width:380px;background:var(--head-btn);border:1px solid var(--head-line);border-radius:8px;padding:7px 10px;color:#fff}
+.proj{flex:1;min-width:160px;max-width:380px;background:var(--head-btn);border:1px solid var(--head-line);border-radius:8px;padding:7px 10px;color:var(--head-ink)}
 .actions{display:flex;gap:6px;flex-wrap:wrap;margin-left:auto}
 .layout{display:grid;grid-template-columns:330px minmax(0,1fr);gap:16px;padding:16px;max-width:1700px;margin:0 auto}
 aside{display:flex;flex-direction:column;gap:12px}
@@ -163,3 +163,11 @@ svg text{font-family:inherit}
 .scrollx{overflow-x:auto}
 .split>*{min-width:0}
 @media (max-width:1000px){.top{position:static}}
+.view3d .wm{position:absolute;right:10px;bottom:8px;display:flex;align-items:center;gap:6px;opacity:.6;pointer-events:none;font-weight:800;font-size:12.5px;color:var(--ink);letter-spacing:-.01em}
+.view3d .wm img{width:15px;height:18px}
+@media print{
+  .pp{background:url(../img/logo-mark-faint.svg) no-repeat 50% 58% / auto 125mm}
+  .pp .pbrand{position:absolute;top:0;right:0}
+  .pp .pbrand img{height:9mm;width:auto;display:block}
+  .pp h1{padding-right:46mm}
+}

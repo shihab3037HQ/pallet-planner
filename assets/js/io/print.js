@@ -50,6 +50,8 @@ function printDoc(){
   printNow();
 }
 function printNow(){
+  $$('#print .pp').forEach(pg => pg.insertAdjacentHTML('afterbegin', '<div class="pbrand"><img src="../assets/img/logo.svg" alt="Hexa Ecom"></div>'));
+  track('print', { mode: S.mode });
   // print on light paper even when the page is in dark mode
   document.documentElement.dataset.theme = 'light';
   window.addEventListener('afterprint', () => { applyTheme(); $('#print').innerHTML = ''; }, { once: true });
