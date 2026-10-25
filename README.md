@@ -27,6 +27,7 @@ A free website for planning pallets, sea containers and air ULDs for Amazon inbo
 | `/` | Landing page |
 | `/app/` | The planner (v2) |
 | `/guide/` | How to use it |
+| `/learn/` | Articles for Google search: pallets per container, container sizes, chargeable weight, Amazon pallet rules |
 
 ## Files
 

@@ -70,5 +70,7 @@ function renderSide(){
     <div class="note">The Container tab shows both options. The one chosen here is used for pallet sheets, print and Excel.</div>
     <label class="chk"><input type="checkbox" data-k="sea.doorSpot" data-t="bool" ${S.sea.doorSpot ? 'checked' : ''}><span>Option 1: turn extra pallets into the space at the doors <span class="note">(only if it fits)</span></span></label>`}
   </div></details>` : ''}
-  <div class="note" style="padding:0 4px">Rules and sizes are typical values. Always confirm the final plan with your forwarder.</div>`;
+  <div class="note" style="padding:0 4px">Rules and sizes are typical values. Always confirm the final plan with your forwarder.</div>
+  <div class="card helpcard"><b>Need help shipping?</b><div class="note">Ask the HexaEcom team about Amazon inbound and your pallet plan.</div>
+    <div class="row" style="margin-top:8px"><a class="btn small wa" href="https://wa.me/8801723252489?text=Hi%20HexaEcom%2C%20I%20found%20you%20on%20the%20Pallet%20Planner." target="_blank" rel="noopener" data-track="contact_whatsapp">WhatsApp</a><a class="btn small" href="mailto:shihabhexa@gmail.com?subject=Shipping%20help%20(Pallet%20Planner)" data-track="contact_email">Email</a><a class="btn small" href="https://hexaecom.com" data-track="contact_website">hexaecom.com</a></div></div>`;
 }

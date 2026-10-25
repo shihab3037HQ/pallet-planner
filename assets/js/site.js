@@ -9,6 +9,7 @@
     document.querySelectorAll('[data-act="theme"]').forEach(b => { b.dataset.mode = t; b.querySelector('.tl').textContent = label[t]; b.title = 'Theme: ' + label[t] + ' (click to change)'; });
   };
   document.addEventListener('click', e => {
+    const tr = e.target.closest('[data-track]'); if (tr && typeof track === 'function') track(tr.dataset.track);
     const b = e.target.closest('[data-act="theme"]'); if (!b) return;
     const next = order[(order.indexOf(get()) + 1) % 3];
     try { localStorage.setItem('pp-theme', next); } catch (err) {}

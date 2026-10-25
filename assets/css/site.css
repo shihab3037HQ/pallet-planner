@@ -82,3 +82,22 @@ section.band .sub{font-size:16px;color:var(--muted);max-width:680px;margin:0 0 2
   .ctaband{padding:24px}
   .ctaband .btn{margin-left:0}
 }
+/* single-column article pages (Learn) */
+.doc.doc1{grid-template-columns:minmax(0,1fr)}
+.doc.doc1 article{max-width:820px;margin:0 auto}
+.doc .faq details p{color:var(--muted)}
+.lcard{display:flex;flex-direction:column;text-decoration:none;color:var(--ink);transition:.15s}
+.lcard:hover{border-color:var(--accent);transform:translateY(-2px)}
+.lcard h3{margin:0 0 6px;font-size:16px}
+.lcard p{margin:0 0 10px;color:var(--muted);font-size:14px}
+.lcard .more{margin-top:auto;color:var(--accent);font-weight:700;font-size:13px}
+/* contact */
+.contact{display:flex;gap:20px 32px;align-items:center;flex-wrap:wrap;padding:28px}
+.contact h2{margin:0 0 6px}
+.contact .sub{margin:0}
+.cbtns{display:flex;gap:10px;flex-wrap:wrap;margin-left:auto}
+.cbtns .btn.primary{background:#1f9d55;border-color:#1f9d55;color:#fff}
+@media (max-width:620px){.cbtns{margin-left:0}.cbtns .btn{flex:1;justify-content:center}}
+.doc .ctaband h2{margin:0;padding:0;color:#fff}
+.doc .ctaband p{color:#c4ccd8;margin:4px 0 0}
+@media (max-width:760px){.top.site{position:static}.top.site .nav a{white-space:nowrap}}
