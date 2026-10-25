@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guide · Pallet & Container Planner | HexaEcom</title>
+<meta name="description" content="How to use the HexaEcom Pallet & Container Planner: import format, pallet rules, sea containers, floor-loaded cartons, air ULDs and contours, chargeable weight, printing and sharing.">
+<meta name="author" content="Gaziur Rahman Shihab, HexaEcom">
+<link rel="canonical" href="https://pallet.hexaecom.com/guide/">
+<meta property="og:title" content="Planner guide | HexaEcom">
+<meta property="og:description" content="Import format, pallet rules, containers, ULD contours and chargeable weight explained.">
+<meta property="og:image" content="https://pallet.hexaecom.com/assets/img/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#111418">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<script>try{var t=localStorage.getItem('pp-theme');if(t&&t!=='auto')document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/site.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top site">
+  <div class="in">
+    <a class="brand" href="../" aria-label="Pallet Planner by HexaEcom, home">
+      <img src="../assets/img/logo-mark-white.svg" alt="" width="30" height="37">
+      <div><b>Pallet Planner <span class="by">by HexaEcom</span></b><small>Sea containers and air ULDs</small></div>
+    </a>
+    <span class="spacer"></span>
+    <nav class="nav" aria-label="Site"><a href="../">Home</a><a href="./" aria-current="page">Guide</a><a href="../v1/">Version 1</a></nav>
+    <a class="btn primary" href="../app/">Open planner</a>
+  </div>
+</header>
+
+<main id="main" class="wrap doc">
+  <nav class="toc" aria-label="On this page">
+    <a href="#start">Getting started</a><a href="#import">Import file</a><a href="#pallets">Pallet rules</a><a href="#sea">Sea containers</a><a href="#loose">Floor-loaded cartons</a><a href="#air">Air ULDs</a><a href="#charge">Chargeable weight</a><a href="#compare">Sea vs air</a><a href="#output">Print, Excel, share</a><a href="#privacy">Your data</a><a href="#limits">Limits</a>
+  </nav>
+  <article>
+    <h1>Planner guide</h1>
+    <p class="lead">Everything the planner does, and how to read its plans. The numbers it uses are typical values: always confirm the final plan with your forwarder or airline.</p>
+
+    <h2 id="start">Getting started</h2>
+    <ol>
+      <li>Open the <a href="../app/">planner</a>. The first time, pick inches/pounds or centimetres/kilograms (you can switch any time in the sidebar).</li>
+      <li>A demo project loads so you can look around. Click <b>New</b> to start your own, then <b>Import AWD / FBA upload file</b> on the Shipments tab.</li>
+      <li>Choose <b>Sea</b> or <b>Air</b> in the sidebar, then set the pallet, limits and container or ULD.</li>
+      <li>Read the <b>Plan</b> tab first: it shows the pallet count and any problems. Then check the <b>Container</b> or <b>Air · ULD</b> tab, the <b>Pallets</b> tab and <b>Compare</b>.</li>
+    </ol>
+    <p>On a phone, the settings sit behind the <b>Settings</b> button above the tabs.</p>
+
+    <h2 id="import">Import file</h2>
+    <p>The planner reads the same Excel or CSV file you upload to Seller Central. It looks for a header row with these columns (names can vary a little):</p>
+    <div class="tblx"><table>
+      <tr><th>Column</th><th>Used for</th></tr>
+      <tr><td><code>Merchant SKU</code> (or <code>SKU</code>)</td><td>Box labels, colours and sizes read from the SKU (for example <code>TEE_Black_M</code>)</td></tr>
+      <tr><td><code>Units per box</code> (or <code>Quantity</code>)</td><td>Units on each pallet</td></tr>
+      <tr><td><code>Number of boxes</code></td><td>How many cartons of this line</td></tr>
+      <tr><td><code>Box length / width / height</code></td><td>Carton size. Headings with <code>(cm)</code> are read as centimetres, otherwise inches</td></tr>
+      <tr><td><code>Box weight</code></td><td>Carton weight. <code>(kg)</code> in the heading means kilograms, otherwise pounds</td></tr>
+    </table></div>
+    <p>Boxes are numbered in Amazon's label order (SKU A to Z), so box numbers on the pallet sheets match the printed box labels. Spot-check one label to be sure. An Amazon shipment ID in the file name (for example <code>FBA17ABCDEF</code>) is picked up automatically.</p>
+
+    <h2 id="pallets">Pallet rules</h2>
+    <ul>
+      <li><b>Always on:</b> no overhang, full flat layers, and only the top layer can be part full. A pallet with a part-full top always goes on top of a stack.</li>
+      <li><b>Height and weight limits</b> default to Amazon's: 52 in per stackable pallet, 100 in for a stack of two, 72 in for a single pallet, 1,500 lb per pallet.</li>
+      <li><b>Mix box sizes on a pallet:</b> off groups pallets by box size; on uses fewer pallets.</li>
+      <li><b>Let one pallet carry 2 shipments:</b> only used when a shipment needs more pallets than it has pallet labels.</li>
+      <li><b>Boxes on their side:</b> can fit more, but check for "This side up" markings.</li>
+      <li><b>Measure your real empty pallet height.</b> It decides how many layers fit.</li>
+    </ul>
+
+    <h2 id="sea">Sea containers</h2>
+    <div class="tblx"><table>
+      <tr><th>Type</th><th>Notes</th></tr>
+      <tr><td>20' / 40' Standard, 20' / 40' / 45' High Cube</td><td>Door height limits each pallet; stacks taller than the door are built inside.</td></tr>
+      <tr><td>20' Reefer, 40' High Cube Reefer</td><td>Height is to the red load line, so cold air can flow over the cargo.</td></tr>
+      <tr><td>20' / 40' Open Top</td><td>Loaded from the top, so the door height doesn't limit cargo.</td></tr>
+      <tr><td>20' / 40' Flat Rack</td><td>No side walls or roof; height is the end-wall height. Cargo must be lashed.</td></tr>
+    </table></div>
+    <p>The Container tab shows two floor patterns. <b>Option 1 · Straight rows</b> turns every pallet the same way. <b>Option 2 · Two lanes</b> puts one lane long side across and one short side across, which often fits more 40 x 48 in pallets. The option you pick is used for pallet sheets, print and Excel. The <b>Compare</b> tab lists every container and option with the number of containers needed; click a row to use it.</p>
+    <h3>Reading a container plan</h3>
+    <ul>
+      <li><b>Floor plan:</b> each spot shows the bottom and top pallet of the stack. Spot numbers run front wall to doors.</li>
+      <li><b>Fill and balance:</b> volume, floor and payload used, and the <b>weight centre</b> along the length. Once most of the floor is used, aim for 40 to 60%, so the truck chassis and crane lift stay balanced.</li>
+      <li><b>3D:</b> drag to rotate, scroll or pinch to zoom, click a pallet for its details. <b>Play loading</b> shows the pallets going in, in load order. Camera buttons jump to 3D, top, side or door views.</li>
+      <li><b>Loading order:</b> front wall to doors, bottom pallet first, then the pallet that goes on top.</li>
+    </ul>
+
+    <h2 id="loose">Floor-loaded cartons</h2>
+    <p>Switch <b>Load as</b> to <b>Loose cartons</b> to plan without pallets. Cartons are stacked in walls across the container, from the front wall to the doors. Each wall holds one box size of one shipment, so walls stay easy to count and check against box numbers. The plan lists every wall with its box numbers and shows how much floor is left at the doors.</p>
+    <div class="callout warn">Floor-loaded containers are unloaded by hand. Amazon and many 3PLs charge more for them or ask for pallets, so check with the receiving warehouse. Also check carton strength: the planner shows how much weight sits on a bottom carton.</div>
+
+    <h2 id="air">Air ULDs</h2>
+    <p>Air cargo travels on <b>ULDs</b> (unit load devices): flat aluminium pallets that are built up and netted, or closed containers. The planner places your pallets on the ULD base and checks them against its <b>contour</b>, the outline the cargo must stay inside.</p>
+    <div class="tblx"><table>
+      <tr><th>ULD</th><th>Base</th><th>Contour height</th><th>Where</th></tr>
+      <tr><td>PMC / P6P pallet</td><td>125 x 96 in</td><td>160 cm lower deck, 244 or 300 cm main deck</td><td>Wide-body lower deck, freighter main deck</td></tr>
+      <tr><td>PAG / P1P pallet</td><td>125 x 88 in</td><td>160 cm or 244 cm</td><td>Lower deck, main deck</td></tr>
+      <tr><td>PLA half pallet</td><td>120.5 x 60.4 in</td><td>160 cm</td><td>Lower deck</td></tr>
+      <tr><td>AKE / LD3 container</td><td>61.5 x 60.4 in</td><td>160 cm, with an overhang on one side</td><td>Wide-body lower deck</td></tr>
+      <tr><td>DQF / LD8 container</td><td>96 x 60.4 in</td><td>160 cm, overhang both sides</td><td>Lower deck (767)</td></tr>
+      <tr><td>ALP / LD11 container</td><td>125 x 60.4 in</td><td>160 cm, straight sides</td><td>Lower deck</td></tr>
+    </table></div>
+    <p>Contours slope at the top edges, so a pallet near the edge of the base can be lower than one in the middle. The planner tries two layouts: the most pallets per ULD, and one row down the middle. It uses the one that needs the fewest ULDs with nothing outside the contour. Each spot shows its <b>max</b> height. A pallet that still doesn't fit is drawn in <b style="color:var(--err)">red</b>: lower the height limit, or pick a main-deck ULD.</p>
+    <p><b>Edge clearance</b> keeps pallets a little in from the ULD edge for the net and locks. Contours here are simplified and typical; they differ by aircraft type and position.</p>
+
+    <h2 id="charge">Chargeable weight</h2>
+    <p>Airlines charge the higher of the <b>gross weight</b> and the <b>volume weight</b>. Volume weight = length x width x height in cm, divided by the <b>divisor</b>:</p>
+    <ul><li><b>6000</b> is the IATA standard for air freight (1 m³ = 166.7 kg).</li><li><b>5000</b> is common for couriers and express (1 m³ = 200 kg).</li></ul>
+    <p>The Air tab shows chargeable weight per pallet and per ULD, and what the same boxes would cost to send loose. Forwarders round and add minimums, so treat it as an estimate.</p>
+
+    <h2 id="compare">Sea vs air</h2>
+    <p>The <b>Compare</b> tab plans the same boxes both ways with your settings: containers and cubic metres for sea, chargeable weight and ULDs for air. Enter your forwarder's rates (per container and per kg) to see a rough cost. Real quotes add fees, surcharges and minimums.</p>
+
+    <h2 id="output">Print, Excel, share</h2>
+    <ul>
+      <li><b>Print / PDF:</b> a summary page, the loading options, one page per container or ULD (with a 3D picture when the <b>3D</b> box is ticked), and one sheet per pallet with every layer and box number. Choose "Save as PDF" in the print dialog.</li>
+      <li><b>Excel:</b> pallets, boxes, loading plan, loading options and ULD sheets.</li>
+      <li><b>Save / Open:</b> a project file (.json) you can keep or email. Version 1 project files open too.</li>
+      <li><b>Share link:</b> the whole plan, compressed into the link. Anyone with the link sees the plan, including SKUs and shipment IDs.</li>
+    </ul>
+
+    <h2 id="privacy">Your data</h2>
+    <p>The planner runs entirely in your browser. Shipments are saved in your browser's storage on this device, never on a server. A share link keeps the plan after the <code>#</code> in the link, a part browsers do not send to the server. The page loads two free libraries from public CDNs: three.js for 3D and SheetJS for Excel. Everything else works offline once the page is open.</p>
+
+    <h2 id="limits">Limits</h2>
+    <ul>
+      <li>Container sizes, payloads, door heights, ULD contours and maximum weights are typical values.</li>
+      <li>Floor-loaded walls hold one box size of one shipment each; mixed walls are not planned.</li>
+      <li>Air pallets are not stacked. Loose cartons on a ULD are shown as a chargeable-weight comparison only.</li>
+      <li>If anything looks wrong, <a href="../v1/">version 1</a> is still available unchanged.</li>
+    </ul>
+    <p style="margin-top:30px"><a class="btn primary big" href="../app/">Open the planner</a></p>
+  </article>
+</main>
+
+<footer class="site-foot">
+  <div class="in">
+    <div class="credit"><img src="../assets/img/logo-mark.svg" alt="" width="22" height="27" class="mark-ink"><span>Built by <b>Gaziur Rahman Shihab</b> · <b>HexaEcom</b></span></div>
+    <nav aria-label="Footer"><a href="../app/">Planner</a><a href="./">Guide</a><a href="../v1/">Version 1</a><a href="https://hexaecom.com">hexaecom.com</a></nav>
+  </div>
+</footer>
+</body>
+</html>
