@@ -5,8 +5,9 @@ function closeModal(){ const d = $('#modal'); if (d.open) d.close(); }
 function applyTheme(){
   const t = lsGet('pp-theme') || 'auto';
   if (t === 'auto') delete document.documentElement.dataset.theme; else document.documentElement.dataset.theme = t;
-  const b = $('[data-act="theme"]'); if (b) { b.dataset.mode = t; b.title = 'Theme: ' + t; b.setAttribute('aria-label', 'Theme: ' + t); }
-  theme3D && T.scene && theme3D();
+  const name = { auto: 'Auto', light: 'Light', dark: 'Dark' }[t];
+  const b = $('[data-act="theme"]'); if (b) { b.dataset.mode = t; b.title = 'Theme: ' + name + ' (click to change)'; const l = b.querySelector('.tl'); if (l) l.textContent = name; }
+  if (T.scene) theme3D();
 }
 function askUnits(){
   openModal(`<h2>Which units do you work in?</h2>
@@ -28,29 +29,29 @@ document.addEventListener('click', e => {
   const uldRow = e.target.closest('[data-uld]');
   if (uldRow) { const k = uldRow.dataset.uld; S.air.uld = k; if (ULDS[k].H) S.air.H = ULDS[k].H; ui.uld3d = null; changed(true); toast('Now using ' + ULDS[k].name); return; }
   const t = e.target.closest('button, [data-pallet]'); if (!t) return;
-  if (t.dataset.tab) { ui.tab = t.dataset.tab; render(); return; }
+  if (t.dataset.tab) { ui.tab = t.dataset.tab; render(); track('tab', { tab: ui.tab, mode: S.mode }); return; }
   if (t.dataset.pallet) { ui.pallet = t.dataset.pallet; ui.tab = 'pallets'; render(); window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
   if (t.dataset.view3d) { setView(t.dataset.view3d); return; }
   const useg = t.closest('[data-uiseg]');
   if (useg && t.dataset.v) { ui[useg.dataset.uiseg] = t.dataset.v; ui.cont3d = null; render(); return; }
   const seg = t.closest('[data-seg]');
-  if (seg && t.dataset.v) { setPath(S, seg.dataset.seg, t.dataset.v); ui.cont3d = null; changed(true); return; }
+  if (seg && t.dataset.v) { setPath(S, seg.dataset.seg, t.dataset.v); ui.cont3d = null; changed(true); if (seg.dataset.seg === 'mode' || seg.dataset.seg === 'sea.load') track('setting', { [seg.dataset.seg.replace('.', '_')]: t.dataset.v }); return; }
   const act = t.dataset.act; if (!act) return;
   const si = t.dataset.si != null ? +t.dataset.si : null;
   switch (act) {
-    case 'example': loadExample(); break;
+    case 'example': loadExample(); track('load_example'); break;
     case 'new': if (confirm('Start a new empty project? Save the current one first if you need it.')) { const u = S.units, w = S.wunits; S = defaultState(); S.units = u; S.wunits = w; ui.tab = 'shipments'; ui.pallet = null; ui.cont3d = null; ui.uld3d = null; changed(true); } break;
     case 'open': $('#fileProject').click(); break;
     case 'save': download(new Blob([JSON.stringify(S, null, 1)], { type: 'application/json' }), (S.name || 'pallet-plan').replace(/[^\w\- ]+/g, '').trim().replace(/\s+/g, '_') + '.json'); break;
     case 'excel': exportExcel(); break;
     case 'print': printDoc(); break;
-    case 'share': shareLink(); break;
+    case 'share': shareLink(); track('share_link'); break;
     case 'copyShare': { const i = $('#shareUrl'); i.select(); (navigator.clipboard ? navigator.clipboard.writeText(i.value) : Promise.reject()).then(() => toast('Link copied'), () => { document.execCommand('copy'); toast('Link copied'); }); break; }
     case 'closeModal': closeModal(); break;
     case 'pickUnits': { const v = t.dataset.v; S.units = v; S.wunits = v === 'in' ? 'lb' : 'kg'; lsSet('pp-units', v); closeModal(); changed(true); break; }
-    case 'theme': { const order = ['auto', 'light', 'dark'], cur = lsGet('pp-theme') || 'auto'; lsSet('pp-theme', order[(order.indexOf(cur) + 1) % 3]); applyTheme(); toast('Theme: ' + (lsGet('pp-theme') || 'auto')); break; }
+    case 'theme': { const order = ['auto', 'light', 'dark'], cur = lsGet('pp-theme') || 'auto'; lsSet('pp-theme', order[(order.indexOf(cur) + 1) % 3]); applyTheme(); render(); break; }
     case 'menu': $('#side').classList.toggle('open'); t.setAttribute('aria-expanded', $('#side').classList.contains('open')); break;
-    case 'mode': S.mode = t.dataset.v; changed(true); break;
+    case 'mode': S.mode = t.dataset.v; changed(true); track('compare_switch', { mode: S.mode }); break;
     case 'png': export3D(); break;
     case 'play3d': togglePlay(); break;
     case 'addShip': S.shipments.push({ uid: uid(), name: 'Shipment ' + shipCode(S.shipments.length), sid: '', labels: '', lines: [{ sku: 'SKU-1', upb: 1, boxes: 1, L: 50, W: 40, H: 30, wt: 10 }] }); changed(true); break;
@@ -59,8 +60,8 @@ document.addEventListener('click', e => {
     case 'delShip': if (confirm('Delete this shipment?')) { S.shipments.splice(si, 1); changed(true); } break;
     case 'addLine': { const ls = S.shipments[si].lines; const last = ls[ls.length - 1] || { L: 50, W: 40, H: 30, wt: 10, upb: 1 }; ls.push({ sku: '', upb: last.upb, boxes: 1, L: last.L, W: last.W, H: last.H, wt: last.wt }); changed(false); break; }
     case 'delLine': S.shipments[si].lines.splice(+t.dataset.li, 1); changed(false); break;
-    case 'show3dCont': { const k3 = t.dataset.k3; ui.cont3d = ui.cont3d === k3 ? null : k3; T.key = null; render(); if (ui.cont3d) $('#v3dCont')?.scrollIntoView({ behavior: 'smooth', block: 'center' }); break; }
-    case 'show3dUld': { const k3 = t.dataset.k3; ui.uld3d = ui.uld3d === k3 ? null : k3; T.key = null; render(); if (ui.uld3d) $('#v3dUld')?.scrollIntoView({ behavior: 'smooth', block: 'center' }); break; }
+    case 'show3dCont': { const k3 = t.dataset.k3; ui.cont3d = ui.cont3d === k3 ? null : k3; if (ui.cont3d) track('view_3d', { what: 'container' }); T.key = null; render(); if (ui.cont3d) $('#v3dCont')?.scrollIntoView({ behavior: 'smooth', block: 'center' }); break; }
+    case 'show3dUld': { const k3 = t.dataset.k3; ui.uld3d = ui.uld3d === k3 ? null : k3; if (ui.uld3d) track('view_3d', { what: 'uld' }); T.key = null; render(); if (ui.uld3d) $('#v3dUld')?.scrollIntoView({ behavior: 'smooth', block: 'center' }); break; }
     case 'usePattern': S.sea.pattern = t.dataset.pat; changed(true); break;
   }
 });
@@ -68,7 +69,7 @@ document.addEventListener('input', e => { if (e.target.id === 'step3d') { stopPl
 document.addEventListener('change', e => {
   const el = e.target;
   if (el.id === 'step3d' || el.id === 'print3d') return;
-  if (el.id === 'fileProject') { const f = el.files[0]; el.value = ''; if (!f) return; const fr = new FileReader(); fr.onload = ev => { try { S = normalize(JSON.parse(ev.target.result)); ui.pallet = null; ui.cont3d = null; ui.uld3d = null; ui.tab = 'plan'; changed(true); toast('Project opened'); } catch (err) { toast('That is not a planner project file'); } }; fr.readAsText(f); return; }
+  if (el.id === 'fileProject') { const f = el.files[0]; el.value = ''; if (!f) return; const fr = new FileReader(); fr.onload = ev => { try { S = normalize(JSON.parse(ev.target.result)); ui.pallet = null; ui.cont3d = null; ui.uld3d = null; ui.tab = 'plan'; changed(true); toast('Project opened'); track('open_project'); } catch (err) { toast('That is not a planner project file'); } }; fr.readAsText(f); return; }
   if (el.id === 'fileImport') { const f = el.files[0]; el.value = ''; if (f) importFile(f, ui.importTarget); return; }
   if (el.id === 'projName') { S.name = el.value; saveLocal(); return; }
   if (el.dataset.k) {

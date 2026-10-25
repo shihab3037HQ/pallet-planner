@@ -50,7 +50,7 @@ function skuInfo(sku){
   }
   if (!fill) {
     let h = 0; const base = cand.join('_') || style; for (const c of base) h = (h * 31 + c.charCodeAt(0)) >>> 0;
-    fill = `hsl(${h % 360} 45% 62%)`; colour = cand.join(' ') || '';
+    fill = `hsl(${h % 360}, 45%, 62%)`; colour = cand.join(' ') || '';
   }
   const info = { size, style, colour: colour.replace(/&/g, ' & '), fill, stripe };
   skuCache.set(sku, info); return info;

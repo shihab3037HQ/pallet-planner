@@ -1,6 +1,6 @@
 # Pallet & Container Planner
 
-Built by **Gaziur Rahman Shihab** · **HexaEcom**
+Built by the **HexaEcom** team
 
 Live at **https://pallet.hexaecom.com**
 
@@ -27,7 +27,6 @@ A free website for planning pallets, sea containers and air ULDs for Amazon inbo
 | `/` | Landing page |
 | `/app/` | The planner (v2) |
 | `/guide/` | How to use it |
-| `/v1/` | Version 1, frozen and unchanged, as a fallback |
 
 ## Files
 
@@ -37,7 +36,7 @@ CNAME                  custom domain for GitHub Pages (pallet.hexaecom.com)
 index.html             landing page
 app/index.html         planner page
 guide/index.html       guide
-v1/index.html          version 1 (do not edit)
+v1/index.html          version 1, kept for internal use (not linked from the site; do not edit)
 404.html, robots.txt, sitemap.xml
 assets/
   css/   base.css (theme, header, footer) · app.css (planner) · site.css (landing, guide)
@@ -69,12 +68,16 @@ There is no build step. The scripts are plain files loaded in order by `app/inde
 
 ## Logo
 
-The logo files in `assets/img/` are SVG redraws of the HexaEcom logo. To use the original artwork, replace `logo-mark.svg` (black mark), `logo-mark-white.svg` (white mark, used on the dark header) and `logo.svg` (mark with "Hexa Ecom / Your Growth Partner") with files of the same names.
+The logo files in `assets/img/` are SVG redraws of the HexaEcom logo. `logo-mark-faint.svg` is the watermark on printed pages. To use the original artwork, replace `logo-mark.svg` (black mark), `logo-mark-white.svg` (white mark, used on the dark header) and `logo.svg` (mark with "Hexa Ecom / Your Growth Partner") with files of the same names.
+
+## Visitor counting
+
+The site can count visits with Google Analytics 4. Paste the Measurement ID (`G-XXXXXXXXXX`) into `ANALYTICS_ID` at the top of `assets/js/analytics.js`. While it is empty, nothing is loaded. Only page views and feature names (import, print, Excel, share, 3D) are counted; shipment data is never sent. Visitors can turn it off on the guide page.
 
 ## Notes
 
 - The built-in example is made-up demo data. Shipments you import are saved only in your own browser, never in this repository, so client data stays private even though the site is public.
 - A share link holds the plan after the `#` in the link; browsers never send that part to the server. Anyone with the link can see the plan, including SKUs.
 - The 3D view (three.js 0.160) and the Excel import/export (SheetJS 0.18.5) load from public CDNs, so they need an internet connection. The rest works offline once the page is open.
-- Projects saved in version 1 (in the browser or as a file) open in v2 automatically. Version 1 keeps working at `/v1/`.
+- Version 1 is kept unchanged at `/v1/` for internal use. It is not linked from the site and is hidden from search engines. Projects saved in version 1 open in the new planner automatically.
 - Container sizes, door heights, payloads, ULD contours and weights are typical values. Always confirm the final plan with your forwarder or airline.

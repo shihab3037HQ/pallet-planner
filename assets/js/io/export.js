@@ -1,5 +1,8 @@
 'use strict';
 /* ---------------- export ---------------- */
+function aboutSheet(){
+  return XLSX.utils.aoa_to_sheet([['HexaEcom Pallet & Container Planner'], ['https://pallet.hexaecom.com'], [], ['Project', S.name || ''], ['Created', new Date().toLocaleString()], ['Mode', S.mode === 'sea' ? (S.sea.load === 'loose' ? 'Sea, floor-loaded cartons' : 'Sea, pallets') : 'Air'], [], ['Sizes, payloads and contours are typical values. Confirm the final plan with your forwarder or airline.']]);
+}
 function exportExcel(){
   if (R.loose) { exportExcelLoose(); return; }
   if (!R.pallets.length) { toast('Nothing to export yet'); return; }
@@ -31,7 +34,9 @@ function exportExcel(){
       R.uldPlan.ulds.forEach(u => u.place.forEach(pl => ul.push([u.idx + 1, U.code, pl.spot.no, pl.p.id, +lenVal(pl.p.height, 1), +lenVal(pl.spot.allow, 1), +wtVal(pl.p.weight, 1), pl.over ? 'YES' : ''])));
       XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(ul), 'ULDs');
     }
+    XLSX.utils.book_append_sheet(wb, aboutSheet(), 'HexaEcom');
     XLSX.writeFile(wb, fname + '.xlsx');
+    track('export_excel', { mode: S.mode });
   } else {
     const csv = box.map(r => r.map(c => /[",\n]/.test(String(c)) ? `"${String(c).replace(/"/g, '""')}"` : c).join(',')).join('\n');
     download(new Blob([csv], { type: 'text/csv' }), fname + '_boxes.csv');
@@ -51,7 +56,9 @@ function exportExcelLoose(){
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(walls), 'Loading plan');
     XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(box), 'Boxes');
+    XLSX.utils.book_append_sheet(wb, aboutSheet(), 'HexaEcom');
     XLSX.writeFile(wb, fname + '.xlsx');
+    track('export_excel', { mode: S.mode });
   } else download(new Blob([box.map(r => r.map(c => /[",\n]/.test(String(c)) ? `"${String(c).replace(/"/g, '""')}"` : c).join(',')).join('\n')], { type: 'text/csv' }), fname + '_boxes.csv');
 }
 function download(blob, name){ const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000); }

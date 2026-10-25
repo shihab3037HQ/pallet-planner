@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Pallet & Container Planner | HexaEcom</title>
-<meta name="author" content="Gaziur Rahman Shihab, HexaEcom">
+<meta name="author" content="HexaEcom">
 <meta name="description" content="Plan pallets, container loads and air ULDs for Amazon inbound shipments. 3D views, loading order, sea vs air comparison and printable pallet sheets. Runs in your browser.">
 <link rel="canonical" href="https://pallet.hexaecom.com/app/">
 <meta property="og:title" content="Pallet & Container Planner | HexaEcom">
@@ -15,6 +15,7 @@
 <meta name="theme-color" content="#111418">
 <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
 <script>try{var t=localStorage.getItem('pp-theme');if(t&&t!=='auto')document.documentElement.dataset.theme=t}catch(e){}</script>
+<script src="../assets/js/analytics.js"></script>
 <link rel="stylesheet" href="../assets/css/base.css">
 <link rel="stylesheet" href="../assets/css/app.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" defer></script>
@@ -32,10 +33,10 @@ window.dispatchEvent(new Event('three-ready'));
 <a class="skip" href="#view">Skip to the plan</a>
 <header class="top">
   <a class="brand" href="../" title="Pallet Planner home">
-    <img src="../assets/img/logo-mark-white.svg" alt="Hexa Ecom logo" width="30" height="37">
+    <img src="../assets/img/logo-mark.svg" alt="Hexa Ecom logo" width="30" height="37" class="mark-ink">
     <div><b>Pallet & Container Planner <span class="by">by HexaEcom</span></b><small>Sea containers and air ULDs for Amazon inbound</small></div>
   </a>
-  <nav class="nav" aria-label="Site"><a href="../">Home</a><a href="./" aria-current="page">Planner</a><a href="../guide/">Guide</a><a href="../v1/" title="The original version, kept as a fallback">v1</a></nav>
+  <nav class="nav" aria-label="Site"><a href="../">Home</a><a href="./" aria-current="page">Planner</a><a href="../guide/">Guide</a></nav>
   <input id="projName" class="proj" placeholder="Project name" aria-label="Project name">
   <div class="actions">
     <button class="btn" data-act="example">Example</button>
@@ -46,7 +47,7 @@ window.dispatchEvent(new Event('three-ready'));
     <button class="btn" data-act="excel">Excel</button>
     <label class="printopt" title="Add a 3D picture of each container or ULD to the printout"><input type="checkbox" id="print3d" checked> 3D</label>
     <button class="btn primary" data-act="print">Print / PDF</button>
-    <button class="btn icon" data-act="theme" aria-label="Theme"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor"/></svg></button>
+    <button class="btn themebtn" data-act="theme" aria-label="Switch light or dark theme"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor"/></svg><span class="tl">Auto</span></button>
   </div>
 </header>
 <div class="layout">
@@ -59,8 +60,8 @@ window.dispatchEvent(new Event('three-ready'));
 </div>
 <footer class="site-foot">
   <div class="in">
-    <div class="credit"><img src="../assets/img/logo-mark.svg" alt="" width="22" height="27" class="mark-ink"><span>Built by <b>Gaziur Rahman Shihab</b> · <b>HexaEcom</b> · Pallet & Container Planner v2</span></div>
-    <nav><a href="../guide/">Guide</a><a href="../v1/">Version 1</a><a href="https://hexaecom.com">hexaecom.com</a></nav>
+    <div class="credit"><img src="../assets/img/logo-mark.svg" alt="" width="22" height="27" class="mark-ink"><span>Built by the <b>HexaEcom</b> team · Pallet & Container Planner v2</span></div>
+    <nav><a href="../guide/">Guide</a><a href="../guide/#privacy">Privacy</a><a href="https://hexaecom.com">hexaecom.com</a></nav>
   </div>
 </footer>
 <div id="print"></div>
