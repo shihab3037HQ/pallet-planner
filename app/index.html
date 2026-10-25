@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pallet & Container Planner | HexaEcom</title>
+<meta name="author" content="Gaziur Rahman Shihab, HexaEcom">
+<meta name="description" content="Plan pallets, container loads and air ULDs for Amazon inbound shipments. 3D views, loading order, sea vs air comparison and printable pallet sheets. Runs in your browser.">
+<link rel="canonical" href="https://pallet.hexaecom.com/app/">
+<meta property="og:title" content="Pallet & Container Planner | HexaEcom">
+<meta property="og:description" content="Plan pallets, sea containers and air ULDs in 3D. Free, private, runs in your browser.">
+<meta property="og:image" content="https://pallet.hexaecom.com/assets/img/og-image.png">
+<meta property="og:url" content="https://pallet.hexaecom.com/app/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#111418">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<script>try{var t=localStorage.getItem('pp-theme');if(t&&t!=='auto')document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/app.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" defer></script>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.min.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+<script type="module">
+try {
+  const THREE = await import('three');
+  const { OrbitControls } = await import('three/addons/controls/OrbitControls.js');
+  window.THREE = { ...THREE, OrbitControls };
+} catch (e) { window.THREE_FAILED = true; console.warn('3D library could not load', e); }
+window.dispatchEvent(new Event('three-ready'));
+</script>
+</head>
+<body>
+<a class="skip" href="#view">Skip to the plan</a>
+<header class="top">
+  <a class="brand" href="../" title="Pallet Planner home">
+    <img src="../assets/img/logo-mark-white.svg" alt="Hexa Ecom logo" width="30" height="37">
+    <div><b>Pallet & Container Planner <span class="by">by HexaEcom</span></b><small>Sea containers and air ULDs for Amazon inbound</small></div>
+  </a>
+  <nav class="nav" aria-label="Site"><a href="../">Home</a><a href="./" aria-current="page">Planner</a><a href="../guide/">Guide</a><a href="../v1/" title="The original version, kept as a fallback">v1</a></nav>
+  <input id="projName" class="proj" placeholder="Project name" aria-label="Project name">
+  <div class="actions">
+    <button class="btn" data-act="example">Example</button>
+    <button class="btn" data-act="new">New</button>
+    <button class="btn" data-act="open">Open</button>
+    <button class="btn" data-act="save">Save</button>
+    <button class="btn" data-act="share">Share link</button>
+    <button class="btn" data-act="excel">Excel</button>
+    <label class="printopt" title="Add a 3D picture of each container or ULD to the printout"><input type="checkbox" id="print3d" checked> 3D</label>
+    <button class="btn primary" data-act="print">Print / PDF</button>
+    <button class="btn icon" data-act="theme" aria-label="Theme"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor"/></svg></button>
+  </div>
+</header>
+<div class="layout">
+  <button class="btn side-toggle" data-act="menu" aria-expanded="false" aria-controls="side">Settings: mode, pallet, container, ULD</button>
+  <aside id="side" aria-label="Settings"></aside>
+  <main>
+    <nav class="tabs" id="tabs" role="tablist" aria-label="Plan views"></nav>
+    <section id="view" tabindex="-1"></section>
+  </main>
+</div>
+<footer class="site-foot">
+  <div class="in">
+    <div class="credit"><img src="../assets/img/logo-mark.svg" alt="" width="22" height="27" class="mark-ink"><span>Built by <b>Gaziur Rahman Shihab</b> · <b>HexaEcom</b> · Pallet & Container Planner v2</span></div>
+    <nav><a href="../guide/">Guide</a><a href="../v1/">Version 1</a><a href="https://hexaecom.com">hexaecom.com</a></nav>
+  </div>
+</footer>
+<div id="print"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<dialog id="modal"><div id="modalBody"></div></dialog>
+<input type="file" id="fileProject" accept=".json,application/json" hidden>
+<input type="file" id="fileImport" accept=".xlsx,.xls,.csv" hidden>
+
+<script src="../assets/js/data/constants.js"></script>
+<script src="../assets/js/data/colors.js"></script>
+<script src="../assets/js/data/containers.js"></script>
+<script src="../assets/js/data/uld.js"></script>
+<script src="../assets/js/data/example.js"></script>
+<script src="../assets/js/engine/state.js"></script>
+<script src="../assets/js/engine/units.js"></script>
+<script src="../assets/js/engine/pack.js"></script>
+<script src="../assets/js/engine/sea.js"></script>
+<script src="../assets/js/engine/air.js"></script>
+<script src="../assets/js/views/draw.js"></script>
+<script src="../assets/js/views/common.js"></script>
+<script src="../assets/js/views/side.js"></script>
+<script src="../assets/js/views/shipments.js"></script>
+<script src="../assets/js/views/plan.js"></script>
+<script src="../assets/js/views/container.js"></script>
+<script src="../assets/js/views/airview.js"></script>
+<script src="../assets/js/views/pallets.js"></script>
+<script src="../assets/js/views/compare.js"></script>
+<script src="../assets/js/three/scene.js"></script>
+<script src="../assets/js/three/pallet3d.js"></script>
+<script src="../assets/js/three/container3d.js"></script>
+<script src="../assets/js/three/uld3d.js"></script>
+<script src="../assets/js/io/import.js"></script>
+<script src="../assets/js/io/export.js"></script>
+<script src="../assets/js/io/print.js"></script>
+<script src="../assets/js/io/storage.js"></script>
+<script src="../assets/js/io/share.js"></script>
+<script src="../assets/js/app.js"></script>
+</body>
+</html>
