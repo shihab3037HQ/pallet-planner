@@ -24,6 +24,7 @@ function changed(full){
   clearTimeout(saveT); saveT = setTimeout(saveLocal, 300);
 }
 document.addEventListener('click', e => {
+  const tr = e.target.closest('[data-track]'); if (tr) track(tr.dataset.track);
   const cmp = e.target.closest('[data-cmp]');
   if (cmp) { const [k, pat] = cmp.dataset.cmp.split('|'); S.sea.type = k; S.sea.pattern = pat; ui.cont3d = null; changed(true); toast('Now using ' + CONTAINERS[k].name + ', Option ' + PATTERNS[pat].no); return; }
   const uldRow = e.target.closest('[data-uld]');
