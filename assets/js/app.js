@@ -102,7 +102,7 @@ document.addEventListener('change', e => {
 });
 document.addEventListener('keydown', e => { if (e.key === 'Escape') { stopPlay(); } });
 // three.js arrives as a module after the first render; draw the 3D view once it is ready
-window.addEventListener('three-ready', () => { if (['container', 'air', 'pallets'].includes(ui.tab)) render(); });
+window.addEventListener('three-ready', () => { if (['plan', 'container', 'air', 'pallets'].includes(ui.tab)) render(); });
 matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', () => applyTheme());
 window.addEventListener('hashchange', () => readSharedLink());
 

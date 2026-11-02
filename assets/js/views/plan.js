@@ -26,10 +26,23 @@ function sizeTableHTML(shp, noHead){
   }
   return h + `</tbody></table></div>`;
 }
+// A live 3D look at container 1 of the chosen loading option, right on the Plan tab (sea only).
+function plan3DHTML(){
+  const lay = S.mode === 'sea' && !R.loose && R.layout, C = lay && lay.containers && lay.containers[0];
+  if (!C) return '';
+  const n = lay.containers.length;
+  return `<div class="card plan3d"><div class="row"><b>Container 1 in 3D</b><span class="muted">· ${esc(R.cont.name)} · ${n} container${n > 1 ? 's' : ''} in this plan</span>
+    <span class="spacer"></span><button class="btn small" data-tab="container">All containers →</button></div>${view3dHTML('v3dPlan', { steps: true, doors: true })}</div>`;
+}
+function after3DPlan(){
+  const el = $('#v3dPlan'); if (!el) return;
+  const lay = R.layout, C = lay && lay.containers[0];
+  if (C) mount3D(el, 'plan-option' + lay.fs.no + '-container-1', build3DContainer(C, lay));
+}
 function viewPlan(){
   if (R.loose) return viewPlanLoose();
   if (!R.pallets.length) return msgsHTML() + `<div class="card empty">Nothing to plan yet. Add shipments first.</div>`;
-  let h = kpisHTML() + msgsHTML();
+  let h = kpisHTML() + plan3DHTML() + msgsHTML();
   for (const shp of R.ships) {
     if (!shp.pallets.length) continue;
     const sh = shp.sh, lab = +sh.labels || 0;

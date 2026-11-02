@@ -19,7 +19,7 @@ function render(){
   renderTabs();
   const v = $('#view');
   if (ui.tab === 'shipments') v.innerHTML = viewShipments();
-  else if (ui.tab === 'plan') v.innerHTML = viewPlan();
+  else if (ui.tab === 'plan') { v.innerHTML = viewPlan(); after3DPlan(); }
   else if (ui.tab === 'container') { v.innerHTML = viewContainer(); after3DContainer(); }
   else if (ui.tab === 'air') { v.innerHTML = viewAir(); after3DULD(); }
   else if (ui.tab === 'pallets') { v.innerHTML = viewPallets(); after3DPallet(); }
