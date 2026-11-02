@@ -107,3 +107,77 @@ dialog h2{margin:0 0 6px;font-size:18px}
 .themebtn{gap:6px}
 .themebtn .tl{font-size:12.5px}
 @media (max-width:520px){.themebtn .tl{display:none}}
+
+/* ===================================================================== HexaEcom brand
+   Same fonts, colours, buttons and header as hexaecom.com. Everything above still works; this block
+   only changes the look. */
+:root{
+  --bg:#f3f6fc; --panel:#ffffff; --panel2:#f7f9fd; --seg:#e9eef8; --ink:#0d1324; --muted:#59657c; --faint:#8a94ab; --line:#dbe2ef; --line2:#edf1f8;
+  --brand:#3d6bff; --brand-ink:#ffffff; --accent:#3d6bff; --accent-soft:#e6edff; --ring:#b9c9ff;
+  --amber:#ffb03b; --mint:#22c993; --navy:#0c1530; --night:#060a17;
+  --head:rgba(255,255,255,.86); --head-ink:#0d1324; --head-muted:#59657c; --head-btn:#eef2fb; --head-line:#dbe2ef;
+  --hero:#eef3fd; --hero-ink:#0d1324; --hero-muted:#59657c; --hero-eyebrow:#3d6bff; --hero-shadow:0 40px 90px rgba(13,19,36,.14);
+  --radius:16px;
+  --display:"Bricolage Grotesque","Instrument Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  --body:"Instrument Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:"Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#070b18; --panel:#0e1630; --panel2:#121c3a; --seg:#16224a; --ink:#e9eefb; --muted:#a3b0cc; --faint:#7d8aa8; --line:#22305c; --line2:#1a2548;
+    --brand:#5b82ff; --brand-ink:#ffffff; --accent:#8fb0ff; --accent-soft:#16224a; --ring:#33508f;
+    --head:rgba(6,10,23,.86); --head-ink:#ffffff; --head-muted:#a3b0cc; --head-btn:#121c3a; --head-line:#22305c;
+    --hero:#0a1230; --hero-ink:#ffffff; --hero-muted:#c3cde6; --hero-eyebrow:#9db8ff; --hero-shadow:0 40px 100px rgba(0,0,0,.45);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#070b18; --panel:#0e1630; --panel2:#121c3a; --seg:#16224a; --ink:#e9eefb; --muted:#a3b0cc; --faint:#7d8aa8; --line:#22305c; --line2:#1a2548;
+  --brand:#5b82ff; --brand-ink:#ffffff; --accent:#8fb0ff; --accent-soft:#16224a; --ring:#33508f;
+  --head:rgba(6,10,23,.86); --head-ink:#ffffff; --head-muted:#a3b0cc; --head-btn:#121c3a; --head-line:#22305c;
+  --hero:#0a1230; --hero-ink:#ffffff; --hero-muted:#c3cde6; --hero-eyebrow:#9db8ff; --hero-shadow:0 40px 100px rgba(0,0,0,.45);
+}
+body{font-family:var(--body)}
+h1,h2,h3,h4,.brand b,dialog h2{font-family:var(--display);letter-spacing:-.02em}
+.mono,code{font-family:var(--mono)}
+
+/* the bar back to hexaecom.com, on every page */
+.hx-bar{background:var(--night);color:#c3cde6;font-size:12.5px;position:relative;z-index:51}
+.hx-bar .in{max-width:1180px;margin:0 auto;padding:7px 18px;display:flex;align-items:center;gap:16px}
+.hx-bar a{color:#fff;text-decoration:none;font-weight:600}
+.hx-bar a:hover{text-decoration:underline}
+.hx-bar .hx-home{display:inline-flex;align-items:center;gap:6px}
+.hx-bar .hx-tag{color:#a3b0cc;font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase}
+.hx-bar .hx-audit{margin-left:auto;color:var(--amber)}
+@media (max-width:640px){.hx-bar .hx-tag{display:none}}
+
+/* header: white glass like hexaecom.com */
+.top{background:var(--head);backdrop-filter:blur(14px) saturate(1.6);-webkit-backdrop-filter:blur(14px) saturate(1.6)}
+.brand b{font-size:17px;font-weight:750}
+.brand .by{font-family:var(--body);font-weight:600;color:var(--accent);font-size:14px;letter-spacing:0}
+.brand small{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase}
+.nav a{border-radius:10px;font-size:13.5px}
+.nav a:hover,.nav a[aria-current="page"]{color:var(--accent);background:var(--accent-soft)}
+
+/* buttons: rounded, blue primary with a soft glow */
+.btn{border-radius:12px;transition:background .2s,border-color .2s,box-shadow .2s,transform .2s}
+.btn.big{border-radius:14px;padding:12px 20px}
+.btn.primary,.top .btn.primary{background:var(--brand);border-color:var(--brand);color:var(--brand-ink);box-shadow:0 10px 24px rgba(61,107,255,.28)}
+.btn.primary:hover,.top .btn.primary:hover{background:#2f55d8;border-color:#2f55d8;transform:translateY(-1px)}
+.card{border-radius:var(--radius)}
+dialog{border-radius:20px}
+.toast{background:var(--navy);border-radius:12px}
+
+/* footer: dark, like hexaecom.com */
+.site-foot.hx-foot{background:var(--night);color:#a3b0cc;border-top:0;margin-top:0;padding:48px 18px 28px}
+.hx-foot .grid{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:1.4fr 1fr 1fr 1.2fr;gap:28px}
+.hx-foot h4{color:#fff;font-size:14px;margin:0 0 12px}
+.hx-foot a{color:#c3cde6;text-decoration:none;display:block;padding:3px 0;font-size:13.5px}
+.hx-foot a:hover{color:#fff}
+.hx-foot .logo{display:flex;align-items:center;gap:10px;margin-bottom:12px;padding:0}
+.hx-foot .logo img{width:26px;height:32px}
+.hx-foot .logo b{display:block;color:#fff;font-family:var(--display);font-size:17px}
+.hx-foot .logo small{display:block;font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:#a3b0cc}
+.hx-foot p{margin:0;font-size:13.5px;line-height:1.55;max-width:320px}
+.hx-foot .bottom{max-width:1180px;margin:32px auto 0;padding-top:18px;border-top:1px solid #1a2548;font-size:12.5px;color:#7d8aa8}
+@media (max-width:860px){.hx-foot .grid{grid-template-columns:1fr 1fr}}
+@media (max-width:520px){.hx-foot .grid{grid-template-columns:1fr}}

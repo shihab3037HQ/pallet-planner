@@ -101,3 +101,24 @@ section.band .sub{font-size:16px;color:var(--muted);max-width:680px;margin:0 0 2
 .doc .ctaband h2{margin:0;padding:0;color:#fff}
 .doc .ctaband p{color:#c4ccd8;margin:4px 0 0}
 @media (max-width:760px){.top.site{position:static}.top.site .nav a{white-space:nowrap}}
+
+/* ===================================================================== HexaEcom brand (landing, guide, learn, 404) */
+.hero{position:relative;background:radial-gradient(800px 520px at 88% 0%,rgba(61,107,255,.22),transparent 62%),radial-gradient(640px 460px at 0% 100%,rgba(255,176,59,.2),transparent 62%),linear-gradient(180deg,#f7f9ff,#eef3fd)}
+.hero::before{content:"";position:absolute;inset:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='97'%3E%3Cpath d='M28 1.5L54.5 16.8V47.4L28 62.7L1.5 47.4V16.8Z M28 62.7V97' fill='none' stroke='%23c9d5f2' stroke-width='1'/%3E%3C/svg%3E");background-size:56px 97px;opacity:.8;mask-image:radial-gradient(ellipse at 70% 40%,#000 20%,transparent 75%);-webkit-mask-image:radial-gradient(ellipse at 70% 40%,#000 20%,transparent 75%);animation:hexPan 60s linear infinite;pointer-events:none}
+@keyframes hexPan{to{background-position:0 -97px}}
+.hero .wrap{position:relative;z-index:1}
+:root[data-theme="dark"] .hero{background:radial-gradient(800px 520px at 88% 0%,rgba(61,107,255,.28),transparent 62%),linear-gradient(180deg,#0a1230,#060a17)}
+:root[data-theme="dark"] .hero::before{opacity:.12}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .hero{background:radial-gradient(800px 520px at 88% 0%,rgba(61,107,255,.28),transparent 62%),linear-gradient(180deg,#0a1230,#060a17)}:root:not([data-theme="light"]) .hero::before{opacity:.12}}
+.hero h1{font-weight:780;letter-spacing:-.035em;line-height:1.04}
+.hero .btn.big.primary{background:var(--brand);border-color:var(--brand);color:#fff}
+.hero .btn.big.ghost{background:var(--panel);border-color:var(--line);color:var(--ink)}
+.eyebrow{font-family:var(--mono);font-weight:500;letter-spacing:.1em;color:var(--accent)}
+.eyebrow::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--mint);margin-right:8px;vertical-align:1px}
+section.band h2{font-weight:750;letter-spacing:-.03em}
+.hero .shot,.split2 img{border-radius:24px}
+.chip{font-family:var(--body)}
+.steps .card::before{font-family:var(--display)}
+.ctaband{background:linear-gradient(135deg,var(--navy),#13204a)!important;border-radius:28px!important}
+.ctaband .btn{background:var(--amber);border-color:var(--amber);color:#0d1324}
+@media (prefers-reduced-motion:reduce){.hero::before{animation:none}}
