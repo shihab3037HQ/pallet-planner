@@ -54,6 +54,7 @@
     <p>On a phone, the settings sit behind the <b>Settings</b> button above the tabs.</p>
 
     <h2 id="import">Import file</h2>
+    <div class="mini doc-mini" data-mini="import"></div>
     <p>The planner reads the same Excel or CSV file you upload to Seller Central. It looks for a header row with these columns (names can vary a little):</p>
     <div class="tblx"><table>
       <tr><th>Column</th><th>Used for</th></tr>
@@ -66,6 +67,7 @@
     <p>Boxes are numbered in Amazon's label order (SKU A to Z), so box numbers on the pallet sheets match the printed box labels. Spot-check one label to be sure. An Amazon shipment ID in the file name (for example <code>FBA17ABCDEF</code>) is picked up automatically.</p>
 
     <h2 id="pallets">Pallet rules</h2>
+    <div class="mini doc-mini" data-mini="pallet"></div>
     <ul>
       <li><b>Always on:</b> no overhang, full flat layers, and only the top layer can be part full. A pallet with a part-full top always goes on top of a stack.</li>
       <li><b>Height and weight limits</b> default to Amazon's: 52 in per stackable pallet, 100 in for a stack of two, 72 in for a single pallet, 1,500 lb per pallet.</li>
@@ -76,6 +78,7 @@
     </ul>
 
     <h2 id="sea">Sea containers</h2>
+    <div class="mini doc-mini" data-mini="sea"></div>
     <div class="tblx"><table>
       <tr><th>Type</th><th>Notes</th></tr>
       <tr><td>20' / 40' Standard, 20' / 40' / 45' High Cube</td><td>Door height limits each pallet; stacks taller than the door are built inside.</td></tr>
@@ -93,10 +96,12 @@
     </ul>
 
     <h2 id="loose">Floor-loaded cartons</h2>
+    <div class="mini doc-mini" data-mini="loose"></div>
     <p>Switch <b>Load as</b> to <b>Loose cartons</b> to plan without pallets. Cartons are stacked in walls across the container, from the front wall to the doors. Each wall holds one box size of one shipment, so walls stay easy to count and check against box numbers. The plan lists every wall with its box numbers and shows how much floor is left at the doors.</p>
     <div class="callout warn">Floor-loaded containers are unloaded by hand. Amazon and many 3PLs charge more for them or ask for pallets, so check with the receiving warehouse. Also check carton strength: the planner shows how much weight sits on a bottom carton.</div>
 
     <h2 id="air">Air ULDs</h2>
+    <div class="mini doc-mini" data-mini="air"></div>
     <p>Air cargo travels on <b>ULDs</b> (unit load devices): flat aluminium pallets that are built up and netted, or closed containers. The planner places your pallets on the ULD base and checks them against its <b>contour</b>, the outline the cargo must stay inside.</p>
     <div class="tblx"><table>
       <tr><th>ULD</th><th>Base</th><th>Contour height</th><th>Where</th></tr>
@@ -116,9 +121,11 @@
     <p>The Air tab shows chargeable weight per pallet and per ULD, and what the same boxes would cost to send loose. Forwarders round and add minimums, so treat it as an estimate.</p>
 
     <h2 id="compare">Sea vs air</h2>
+    <div class="mini doc-mini" data-mini="compare"></div>
     <p>The <b>Compare</b> tab plans the same boxes both ways with your settings: containers and cubic metres for sea, chargeable weight and ULDs for air. Enter your forwarder's rates (per container and per kg) to see a rough cost. Real quotes add fees, surcharges and minimums.</p>
 
     <h2 id="output">Print, Excel, share</h2>
+    <div class="mini doc-mini" data-mini="print"></div>
     <ul>
       <li><b>Print / PDF:</b> a summary page, the loading options, one page per container or ULD (with a 3D picture when the <b>3D</b> box is ticked), and one sheet per pallet with every layer and box number. Choose "Save as PDF" in the print dialog.</li>
       <li><b>Excel:</b> pallets, boxes, loading plan, loading options and ULD sheets.</li>
@@ -153,5 +160,6 @@
   <div class="bottom">© 2026 HexaEcom · Built by the HexaEcom team · Independent agency, not affiliated with Amazon, Walmart or any marketplace.</div>
 </footer>
 <script src="../assets/js/site.js" defer></script>
+<script src="../assets/js/mini.js" defer></script>
 </body>
 </html>

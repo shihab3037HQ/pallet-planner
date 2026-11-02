@@ -23,10 +23,12 @@ const coarse = matchMedia('(pointer: coarse)').matches;
 // Floor spots for the two-lanes pattern: lane 1 lengthwise, lane 2 crosswise.
 function spots(box) {
   const out = [];
-  const lane1 = Math.floor(box.l / (PAL.l + GAP)), lane2 = Math.floor(box.l / (PAL.w + GAP));
+  // count without gaps (as the planner does), then spread the spare length as small gaps for the look
+  const lane1 = Math.floor(box.l / PAL.l), lane2 = Math.floor(box.l / PAL.w);
+  const g1 = Math.min(GAP, (box.l - lane1 * PAL.l) / lane1), g2 = Math.min(GAP, (box.l - lane2 * PAL.w) / lane2);
   for (let i = 0; i < Math.max(lane1, lane2); i++) {
-    if (i < lane1) out.push({ x: i * (PAL.l + GAP) + PAL.l / 2, z: PAL.w / 2, rot: false });
-    if (i < lane2) out.push({ x: i * (PAL.w + GAP) + PAL.w / 2, z: PAL.w + GAP + PAL.l / 2, rot: true });
+    if (i < lane1) out.push({ x: i * (PAL.l + g1) + PAL.l / 2, z: PAL.w / 2, rot: false });
+    if (i < lane2) out.push({ x: i * (PAL.w + g2) + PAL.w / 2, z: PAL.w + GAP + PAL.l / 2, rot: true });
   }
   return out;
 }
@@ -137,6 +139,14 @@ function webgl() {
   try { const c = document.createElement('canvas'); return !!(c.getContext('webgl2') || c.getContext('webgl')); } catch (e) { return false; }
 }
 
+// The counts under a picker follow the scene ("20 pallets on the floor").
+document.addEventListener('scene:built', e => {
+  const out = e.target.closest('section')?.querySelector('[data-scene-count]');
+  if (!out) return;
+  const d = e.detail;
+  out.innerHTML = `<b>${d.name}</b>: ${d.floor} US pallets on the floor` + (d.high > 1 ? `, ${d.total} stacked two high` : '');
+});
+
 if (webgl()) {
   document.querySelectorAll('.scene3d').forEach(el => {
     const s = makeScene(el);
@@ -147,10 +157,3 @@ if (webgl()) {
     }));
   });
 }
-// The counts under a picker follow the scene ("20 pallets on the floor").
-document.addEventListener('scene:built', e => {
-  const out = e.target.closest('section')?.querySelector('[data-scene-count]');
-  if (!out) return;
-  const d = e.detail;
-  out.innerHTML = `<b>${d.name}</b>: ${d.floor} US pallets on the floor` + (d.high > 1 ? `, ${d.total} stacked two high` : '');
-});

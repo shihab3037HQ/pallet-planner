@@ -49,6 +49,8 @@ assets/
     three/   scene · pallet3d · container3d · uld3d
     io/      import · export · print · storage · share
     app.js   events and start-up
+    scene3d.js  landing and learn pages: live 3D container with pallets (three.js), container picker
+    mini.js     small moving scenes (guide, learn, 404) and the chargeable weight calculator
 ```
 
 There is no build step. The scripts are plain files loaded in order by `app/index.html`. All sizes are stored in cm and kg; the display converts to inches and pounds.

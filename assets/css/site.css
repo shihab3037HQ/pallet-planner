@@ -218,3 +218,28 @@ section.band h2{font-weight:750;letter-spacing:-.03em}
   .feat .card:not(.lcard) p,.split2 .ticks,.steps.flow p{display:none}
   .feat .card .mini{margin-bottom:10px}
 }
+
+/* ===================================================================== guide, learn and 404: scenes and tools */
+.doc-mini,.nf-mini{height:150px;border-radius:20px;background:linear-gradient(180deg,var(--panel2),var(--seg));border:1px solid var(--line);margin:6px 0 18px;overflow:hidden}
+.nf-mini{max-width:420px;margin:0 auto 18px}
+.ms-row{fill:#c7d4f6;transform-box:fill-box;animation:msRise 6s cubic-bezier(.2,.7,.2,1) infinite}
+.ms-arrow{fill:none;stroke:var(--accent);stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.ms-num{fill:var(--accent)}
+.learn3d{margin:22px 0 26px}
+.learn3d .scene3d{aspect-ratio:16/8}
+.calc{background:var(--panel);border:1px solid var(--line);border-radius:22px;padding:22px;margin:18px 0 26px;box-shadow:0 20px 50px rgba(13,19,36,.08)}
+.calc h3{margin:0 0 14px;font-size:20px}
+.calc-in{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.calc-in label{display:grid;gap:4px;font-size:12.5px;font-weight:600;color:var(--muted)}
+.calc-in input,.calc-in select{border:1px solid var(--line);border-radius:10px;padding:9px 10px;background:var(--panel2);font-size:15px;color:var(--ink);width:100%}
+.calc-out{display:grid;grid-template-columns:1fr 1fr 1.2fr;gap:12px;margin-top:16px}
+.calc-out>div{background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+.calc-out small{display:block;font:500 10.5px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.calc-out strong{display:block;font:750 22px/1.2 var(--display);margin-top:4px}
+.calc-out .big{background:linear-gradient(160deg,#13204a,#0a1230);border-color:#22305c;color:#fff}
+.calc-out .big small{color:#a3b0cc}.calc-out .big em{display:block;font-style:normal;font-size:12.5px;color:var(--mint);margin-top:4px}
+.calc-out .bar{display:block;height:6px;border-radius:3px;background:var(--seg);margin-top:8px;overflow:hidden}
+.calc-out .bar b{display:block;height:100%;background:var(--accent);border-radius:3px;transition:width .4s}
+.calc-out .bar b.amber{background:var(--amber)}
+@media (max-width:640px){.calc-in{grid-template-columns:1fr 1fr}.calc-out{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){.ms-row{animation:none}}

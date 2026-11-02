@@ -48,13 +48,29 @@
     <p>Airlines charge for space as well as weight. They work out a <b>volume weight</b> and charge whichever is higher, the gross weight or the volume weight:</p>
     <div class="callout"><b>Volume weight (kg) = length x width x height (cm) ÷ 6000</b><br>In inches and pounds: length x width x height (in) ÷ 166.<br><b>Chargeable weight</b> = the higher of gross weight and volume weight.</div>
     <p>6000 is the IATA standard for air freight (1 m³ counts as 166.7 kg). Couriers and express services usually use <b>5000</b> (1 m³ = 200 kg), which makes light, bulky shipments more expensive.</p>
+    <section class="calc" data-calc="chargeable" aria-label="Chargeable weight calculator">
+      <p class="eyebrow">Try it</p><h3>Chargeable weight calculator</h3>
+      <div class="calc-in">
+        <label>Length (cm)<input name="l" type="number" min="0" step="0.1" value="121.9"></label>
+        <label>Width (cm)<input name="w" type="number" min="0" step="0.1" value="101.6"></label>
+        <label>Height (cm)<input name="h" type="number" min="0" step="0.1" value="152.4"></label>
+        <label>Gross weight each (kg)<input name="kg" type="number" min="0" step="0.1" value="400"></label>
+        <label>How many<input name="n" type="number" min="1" step="1" value="1"></label>
+        <label>Divisor<select name="d"><option value="6000">6000 (air freight)</option><option value="5000">5000 (courier, express)</option></select></label>
+      </div>
+      <div class="calc-out">
+        <div><small>Volume weight</small><strong data-out="vol"></strong><i class="bar"><b data-bar="vol"></b></i></div>
+        <div><small>Gross weight</small><strong data-out="real"></strong><i class="bar"><b data-bar="real" class="amber"></b></i></div>
+        <div class="big"><small>You pay for</small><strong data-out="charge"></strong><em data-out="why"></em></div>
+      </div>
+    </section>
     <h2 id="example">Worked example</h2>
     <p>One US pallet, 48 x 40 in, built to 60 in high (121.9 x 101.6 x 152.4 cm), weighing 400 kg:</p>
     <ul>
       <li>Volume: 121.9 x 101.6 x 152.4 = 1,887,790 cm³ (1.89 m³)</li>
       <li>Volume weight at 6000: 1,887,790 ÷ 6000 = <b>315 kg</b></li>
       <li>Gross weight: 400 kg</li>
-      <li>Chargeable weight: <b>400 kg</b>, because the volume weight is higher. At 5000 it would be 378 kg.</li>
+      <li>Chargeable weight: <b>400 kg</b>, because the gross weight is higher. At 5000 the volume weight would be 378 kg, still below 400 kg.</li>
     </ul>
     <p>If the same pallet weighed 600 kg, you would pay for 600 kg: heavy, dense cargo is charged by gross weight.</p>
     <h2 id="tips">How to lower the chargeable weight</h2>
@@ -91,5 +107,6 @@
   <div class="bottom">© 2026 HexaEcom · Built by the HexaEcom team · Independent agency, not affiliated with Amazon, Walmart or any marketplace.</div>
 </footer>
 <script src="../../assets/js/site.js" defer></script>
+<script src="../../assets/js/mini.js" defer></script>
 </body>
 </html>
