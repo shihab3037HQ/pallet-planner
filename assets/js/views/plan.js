@@ -1,5 +1,16 @@
 'use strict';
 /* ---------------- Plan view ---------------- */
+// Side view of a pallet for its card: the wooden base, then each layer, part-full layers narrower.
+function tileSVG(p, ink){
+  const maxH = Math.max(...R.pallets.map(x => x.height)) || p.height, W = 64, H = 30, base = 3;
+  let y = H - base, out = `<rect x="2" y="${H - base}" width="${W - 4}" height="${base}" rx="1" fill="#c8925a"/>`;
+  for (const L of p.layers) {
+    const h = Math.max(2, L.h / maxH * (H - base - 2)), fill = L.full ? 1 : Math.max(.25, L.boxes.length / Math.max(1, L.rects.length));
+    y -= h;
+    out += `<rect x="3" y="${y.toFixed(1)}" width="${((W - 6) * fill).toFixed(1)}" height="${(h - .8).toFixed(1)}" rx="1" fill="${ink}" opacity="${L.full ? .9 : .55}"/>`;
+  }
+  return `<svg class="tsvg" viewBox="0 0 ${W} ${H}" aria-hidden="true">${out}</svg>`;
+}
 function tileHTML(p, sel){
   const role = p.level === 'bottom' ? 'BOTTOM' : p.level === 'top' ? 'TOP' : S.mode === 'sea' ? 'SINGLE' : '';
   const flags = [];
@@ -8,7 +19,7 @@ function tileHTML(p, sel){
   if (!p.flat) flags.push('part-full top');
   const dark = p.level === 'bottom';
   return `<button class="tile ${sel ? 'on' : ''}" data-pallet="${p.uid}" style="border-color:${shipColor(p.si)};background:${dark ? shipColor(p.si) : shipLight(p.si)};color:${dark ? '#fff' : 'inherit'}">
-    <div class="id" style="color:${dark ? '#fff' : shipColor(p.si)}">${esc(p.id)}</div>
+    ${tileSVG(p, dark ? '#ffffff' : shipColor(p.si))}<div class="id" style="color:${dark ? '#fff' : shipColor(p.si)}">${esc(p.id)}</div>
     <div class="m" style="color:${dark ? 'rgba(255,255,255,.85)' : ''}">${p.count} boxes · ${esc(fL(p.height, 0))}</div>
     <div class="f" style="color:${dark ? '#fff' : '#5d6878'}">${role}${flags.length ? ' · ' + flags.join(' · ') : ''}</div></button>`;
 }
@@ -33,6 +44,21 @@ function plan3DHTML(){
   const n = lay.containers.length;
   return `<div class="card plan3d"><div class="row"><b>Container 1 in 3D</b><span class="muted">· ${esc(R.cont.name)} · ${n} container${n > 1 ? 's' : ''} in this plan</span>
     <span class="spacer"></span><button class="btn small" data-tab="container">All containers →</button></div>${view3dHTML('v3dPlan', { steps: true, doors: true })}</div>`;
+}
+// Phone bar: the headline numbers from the tiles on screen, with 3D and Print always one tap away.
+let mbarLast = '';
+function renderMbar(){
+  const m = $('#mbar'); if (!m) return;
+  const tiles = [...document.querySelectorAll('#view .kpi')];
+  const dark = tiles.find(t => t.classList.contains('dark'));
+  const pal = tiles.find(t => /pallets|walls/i.test(t.querySelector('.k')?.textContent || ''));
+  if (dark) {
+    const n = t => `<b>${esc(t.querySelector('.v').textContent)}</b> ${esc(t.querySelector('.k').textContent.toLowerCase())}`;
+    mbarLast = `<div class="mb-n">${pal ? n(pal) + ' · ' : ''}${n(dark)}</div>` +
+      (S.mode === 'sea' && !R.loose && R.layout ? '<button class="btn small" data-mb3d>3D</button>' : '') +
+      '<button class="btn small primary" data-act="print">Print / PDF</button>';
+  }
+  m.innerHTML = mbarLast;
 }
 function after3DPlan(){
   const el = $('#v3dPlan'); if (!el) return;

@@ -43,12 +43,15 @@ window.dispatchEvent(new Event('three-ready'));
   <nav class="nav" aria-label="Site"><a href="../">Home</a><a href="./" aria-current="page">Planner</a><a href="../learn/">Learn</a><a href="../guide/">Guide</a></nav>
   <input id="projName" class="proj" placeholder="Project name" aria-label="Project name">
   <div class="actions">
-    <button class="btn" data-act="example">Example</button>
-    <button class="btn" data-act="new">New</button>
-    <button class="btn" data-act="open">Open</button>
-    <button class="btn" data-act="save">Save</button>
+    <div class="filemenu"><button class="btn file-toggle" type="button" aria-expanded="false" aria-controls="fileItems">File ▾</button>
+      <div class="file-items" id="fileItems">
+        <button class="btn" data-act="example">Example</button>
+        <button class="btn" data-act="new">New</button>
+        <button class="btn" data-act="open">Open</button>
+        <button class="btn" data-act="save">Save</button>
+        <button class="btn" data-act="excel">Excel</button>
+      </div></div>
     <button class="btn" data-act="share">Share link</button>
-    <button class="btn" data-act="excel">Excel</button>
     <label class="printopt" title="Add a 3D picture of each container or ULD to the printout"><input type="checkbox" id="print3d" checked> 3D</label>
     <button class="btn primary" data-act="print">Print / PDF</button>
     <button class="btn themebtn" data-act="theme" aria-label="Switch light or dark theme"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor"/></svg><span class="tl">Auto</span></button>
@@ -74,6 +77,7 @@ window.dispatchEvent(new Event('three-ready'));
 </footer>
 <div id="print"></div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
+<div class="mbar" id="mbar" aria-label="Plan summary"></div>
 <dialog id="modal"><div id="modalBody"></div></dialog>
 <input type="file" id="fileProject" accept=".json,application/json" hidden>
 <input type="file" id="fileImport" accept=".xlsx,.xls,.csv" hidden>

@@ -24,6 +24,10 @@ function changed(full){
   clearTimeout(saveT); saveT = setTimeout(saveLocal, 300);
 }
 document.addEventListener('click', e => {
+  const fm = e.target.closest('.file-toggle'), menu = document.querySelector('.filemenu');
+  if (fm) { const open = menu.classList.toggle('open'); fm.setAttribute('aria-expanded', open); return; }
+  if (menu && menu.classList.contains('open')) { menu.classList.remove('open'); document.querySelector('.file-toggle').setAttribute('aria-expanded', 'false'); }
+  if (e.target.closest('[data-mb3d]')) { if (ui.tab !== 'plan') { ui.tab = 'plan'; render(); } setTimeout(() => $('#v3dPlan')?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 60); return; }
   const tr = e.target.closest('[data-track]'); if (tr) track(tr.dataset.track);
   const cmp = e.target.closest('[data-cmp]');
   if (cmp) { const [k, pat] = cmp.dataset.cmp.split('|'); S.sea.type = k; S.sea.pattern = pat; ui.cont3d = null; changed(true); toast('Now using ' + CONTAINERS[k].name + ', Option ' + PATTERNS[pat].no); return; }

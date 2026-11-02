@@ -243,3 +243,4 @@ section.band h2{font-weight:750;letter-spacing:-.03em}
 .calc-out .bar b.amber{background:var(--amber)}
 @media (max-width:640px){.calc-in{grid-template-columns:1fr 1fr}.calc-out{grid-template-columns:1fr}}
 @media (prefers-reduced-motion:reduce){.ms-row{animation:none}}
+.doc article{min-width:0;width:100%}.doc .tblx{max-width:100%}

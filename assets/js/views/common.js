@@ -25,6 +25,7 @@ function render(){
   else if (ui.tab === 'pallets') { v.innerHTML = viewPallets(); after3DPallet(); }
   else if (ui.tab === 'compare') v.innerHTML = viewCompare();
   $('#projName').value = S.name || '';
+  renderMbar();
 }
 function msgsHTML(){
   const icon = { error: 'Problem', warn: 'Check', info: 'Note', ok: 'OK' };
