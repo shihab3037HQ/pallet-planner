@@ -197,7 +197,7 @@ svg text{font-family:inherit}
 .tile .id{font-family:var(--display);letter-spacing:-.01em}
 /* messages as cards with a colour edge */
 .msg{border-radius:12px;border-left:4px solid currentColor}
-.msg b{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding-top:2px}
+.msg>b:first-child{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding-top:2px}
 /* phone bar */
 .mbar{display:none}
 @media (max-width:700px){
