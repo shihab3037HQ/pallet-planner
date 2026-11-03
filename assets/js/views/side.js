@@ -72,5 +72,5 @@ function renderSide(){
   </div></details>` : ''}
   <div class="note" style="padding:0 4px">Rules and sizes are typical values. Always confirm the final plan with your forwarder.</div>
   <div class="card helpcard"><b>Need help shipping?</b><div class="note">Ask the HexaEcom team about Amazon inbound and your pallet plan.</div>
-    <div class="row" style="margin-top:8px"><a class="btn small wa" href="https://wa.me/8801723252489?text=Hi%20HexaEcom%2C%20I%20found%20you%20on%20the%20Pallet%20Planner." target="_blank" rel="noopener" data-track="contact_whatsapp">WhatsApp</a><a class="btn small" href="mailto:shihabhexa@gmail.com?subject=Shipping%20help%20(Pallet%20Planner)" data-track="contact_email">Email</a><a class="btn small" href="https://hexaecom.com" data-track="contact_website">hexaecom.com</a></div></div>`;
+    <div class="row" style="margin-top:8px"><a class="btn small wa" href="https://wa.me/8801723252489?text=Hi%20HexaEcom%2C%20I%20found%20you%20on%20the%20Pallet%20Planner." target="_blank" rel="noopener" data-track="contact_whatsapp">WhatsApp</a><a class="btn small" href="mailto:support@hexaecom.com?subject=Shipping%20help%20(Pallet%20Planner)" data-track="contact_email">Email</a><a class="btn small" href="https://hexaecom.com" data-track="contact_website">hexaecom.com</a></div></div>`;
 }
