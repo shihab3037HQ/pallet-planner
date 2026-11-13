@@ -54,6 +54,6 @@ function printNow(){
   track('print', { mode: S.mode });
   // print on light paper even when the page is in dark mode
   document.documentElement.dataset.theme = 'light';
-  window.addEventListener('afterprint', () => { applyTheme(); $('#print').innerHTML = ''; }, { once: true });
+  window.addEventListener('afterprint', () => { applyTheme(); $('#print').innerHTML = ''; askFeedback(); }, { once: true });
   setTimeout(() => window.print(), 50);
 }

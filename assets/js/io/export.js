@@ -37,6 +37,7 @@ function exportExcel(){
     XLSX.utils.book_append_sheet(wb, aboutSheet(), 'HexaEcom');
     XLSX.writeFile(wb, fname + '.xlsx');
     track('export_excel', { mode: S.mode });
+    askFeedback();
   } else {
     const csv = box.map(r => r.map(c => /[",\n]/.test(String(c)) ? `"${String(c).replace(/"/g, '""')}"` : c).join(',')).join('\n');
     download(new Blob([csv], { type: 'text/csv' }), fname + '_boxes.csv');
@@ -59,6 +60,10 @@ function exportExcelLoose(){
     XLSX.utils.book_append_sheet(wb, aboutSheet(), 'HexaEcom');
     XLSX.writeFile(wb, fname + '.xlsx');
     track('export_excel', { mode: S.mode });
+    askFeedback();
   } else download(new Blob([box.map(r => r.map(c => /[",\n]/.test(String(c)) ? `"${String(c).replace(/"/g, '""')}"` : c).join(',')).join('\n')], { type: 'text/csv' }), fname + '_boxes.csv');
 }
 function download(blob, name){ const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000); }
+
+// After a download, the feedback button (assets/js/feedback.js) asks once how the planner was.
+function askFeedback(){ if (window.hxFeedback) setTimeout(() => window.hxFeedback.ask('Pallet Planner'), 1500); }

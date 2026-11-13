@@ -35,7 +35,7 @@ window.dispatchEvent(new Event('three-ready'));
 <body>
 <a class="skip" href="#view">Skip to the plan</a>
 <div class="hx-bar"><div class="in"><a class="hx-home" href="https://hexaecom.com/"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>Back to HexaEcom</a><span class="hx-tag">A free tool by HexaEcom · Your Growth Partner</span><a class="hx-audit" href="https://hexaecom.com/free-audit/">Free store audit →</a></div></div>
-<header class="top">
+<header class="top" data-feedback-section data-feedback-label="Top bar: file, share and print">
   <a class="brand" href="../" title="Pallet Planner home">
     <img src="../assets/img/logo-mark.svg" alt="Hexa Ecom logo" width="30" height="37" class="mark-ink">
     <div><b>HexaEcom <span class="by">Pallet Planner</span></b><small>Free tool · pallets, sea and air</small></div>
@@ -59,10 +59,10 @@ window.dispatchEvent(new Event('three-ready'));
 </header>
 <div class="layout">
   <button class="btn side-toggle" data-act="menu" aria-expanded="false" aria-controls="side">Settings: mode, pallet, container, ULD</button>
-  <aside id="side" aria-label="Settings"></aside>
+  <aside id="side" aria-label="Settings" data-feedback-section data-feedback-label="Settings: mode, pallet, container, ULD"></aside>
   <main>
-    <nav class="tabs" id="tabs" role="tablist" aria-label="Plan views"></nav>
-    <section id="view" tabindex="-1"></section>
+    <nav class="tabs" id="tabs" role="tablist" aria-label="Plan views" data-feedback-section data-feedback-label="Plan tabs"></nav>
+    <section id="view" tabindex="-1" data-feedback-section data-feedback-label="The plan and results"></section>
   </main>
 </div>
 <footer class="site-foot hx-foot">
@@ -111,5 +111,6 @@ window.dispatchEvent(new Event('three-ready'));
 <script src="../assets/js/io/storage.js"></script>
 <script src="../assets/js/io/share.js"></script>
 <script src="../assets/js/app.js"></script>
+<script src="/assets/js/feedback.js" defer data-bottom="78px"></script>
 </body>
 </html>
